@@ -175,6 +175,7 @@ const Background = () => (
 const App: React.FC = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [showStart, setShowStart] = useState(false);
+  const [isOpeningMap, setIsOpeningMap] = useState(false);
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -187,6 +188,17 @@ const App: React.FC = () => {
   const handleStart = () => {
     toggleFullscreen();
     setIsLoaded(true);
+  };
+
+  const handleOpenMap = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsOpeningMap(true);
+    
+    // Wait for animation then open map
+    setTimeout(() => {
+      window.open("https://www.google.com/maps?q=Restaurant+DA+ETTORE+Promenade+des+Champs-Frechets+13+Meyrin+Suisse", "_blank", "noopener,noreferrer");
+      setIsOpeningMap(false);
+    }, 2000);
   };
 
   const bubbleBaseClasses = "bg-black/30 backdrop-blur-xl rounded-[2.5rem] shadow-2xl shadow-black/50 border border-rose-200/10 w-full transition-colors duration-700 ease-out hover:border-rose-200/30 hover:bg-black/40";
@@ -202,6 +214,44 @@ const App: React.FC = () => {
     <>
       <Background />
       <BackgroundParticles />
+
+      <AnimatePresence>
+        {isOpeningMap && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/80 backdrop-blur-xl"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", damping: 12 }}
+              className="relative"
+            >
+              <div className="w-24 h-24 rounded-full border-2 border-rose-200/20 flex items-center justify-center">
+                <motion.div
+                  animate={{ 
+                    scale: [1, 1.5, 1],
+                    opacity: [0.3, 0.1, 0.3]
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="absolute inset-0 bg-rose-200 rounded-full"
+                />
+                <LocationMarkerIcon className="w-10 h-10 text-rose-200" />
+              </div>
+            </motion.div>
+            <motion.p
+              initial={{ y: 10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="mt-8 font-serif italic text-xl text-rose-100 tracking-wide"
+            >
+              Ouverture de la carte...
+            </motion.p>
+          </motion.div>
+        )}
+      </AnimatePresence>
       
       <AnimatePresence mode="wait">
         {!isLoaded && (
@@ -338,10 +388,8 @@ const App: React.FC = () => {
           
           <TiltableBubble className="w-full">
             <div className="relative group">
-              <a 
-                href="https://www.google.com/maps?q=Restaurant+DA+ETTORE+Promenade+des+Champs-Frechets+13+Meyrin+Suisse" 
-                target="_blank" 
-                rel="noopener noreferrer"
+              <div 
+                onClick={handleOpenMap}
                 style={{ transform: "translateZ(10px)" }}
                 className={`${bubbleBaseClasses} p-8 flex items-center space-x-6 hover:bg-rose-200/[0.08] group cursor-pointer relative z-10 pointer-events-auto`}
               >
@@ -365,7 +413,7 @@ const App: React.FC = () => {
                     <span className="underline decoration-rose-200/30 underline-offset-8">Voir sur la carte</span>
                   </p>
                 </div>
-              </a>
+              </div>
               
               {/* Fallback Copy Button */}
               <button 
