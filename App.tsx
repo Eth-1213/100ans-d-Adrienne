@@ -160,6 +160,18 @@ const StaggeredText: React.FC<{ text: string; className?: string; delay?: number
   );
 };
 
+const Background = () => (
+  <div 
+    className="fixed inset-0 z-[-1] bg-[#0d0d0d]"
+    style={{
+      backgroundImage: "linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1522383225653-ed111181a951?q=80&w=2076&auto=format&fit=crop')",
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      backgroundAttachment: "fixed"
+    }}
+  />
+);
+
 const App: React.FC = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [showStart, setShowStart] = useState(false);
@@ -188,6 +200,7 @@ const App: React.FC = () => {
 
   return (
     <>
+      <Background />
       <BackgroundParticles />
       
       <AnimatePresence mode="wait">
