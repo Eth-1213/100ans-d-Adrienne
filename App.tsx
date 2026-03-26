@@ -201,7 +201,7 @@ const App: React.FC = () => {
           <TiltableBubble className="w-full" delay={1.5}>
             <div className={`${bubbleBaseClasses} p-10 text-center`}>
               <StaggeredText 
-                text="Vous êtes invitée" 
+                text="Vous êtes invité" 
                 className="text-sm font-black uppercase tracking-[0.5em] text-white/90 mb-4"
                 delay={1.8}
               />
