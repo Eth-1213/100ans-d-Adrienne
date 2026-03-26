@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence, useScroll, useTransform, useSpring, useMotionValue } from 'motion/react';
+import { motion, AnimatePresence, useScroll, useTransform, useSpring, useMotionValue, MotionValue } from 'motion/react';
 import { CalendarIcon, LocationMarkerIcon } from './components/Icons';
 
 // Static particle data with drift properties
@@ -26,33 +26,64 @@ const STATIC_PARTICLES = [
   { id: 19, x: 38, y: 72, opacity: 0.5, duration: 13, delay: 1, drift: -15 },
 ];
 
+const Particle: React.FC<{ p: typeof STATIC_PARTICLES[0]; mouseX: MotionValue<number>; mouseY: MotionValue<number> }> = ({ p, mouseX, mouseY }) => {
+  const parallaxX = useTransform(mouseX, [-0.5, 0.5], [p.drift * -0.5, p.drift * 0.5]);
+  const parallaxY = useTransform(mouseY, [-0.5, 0.5], [p.drift * -0.5, p.drift * 0.5]);
+  const springX = useSpring(parallaxX, { damping: 60, stiffness: 120 });
+  const springY = useSpring(parallaxY, { damping: 60, stiffness: 120 });
+
+  return (
+    <motion.div
+      className="absolute rounded-full"
+      style={{
+        width: p.id % 4 === 0 ? '6px' : '3px',
+        height: p.id % 4 === 0 ? '6px' : '3px',
+        backgroundColor: p.id % 3 === 0 ? 'rgba(255, 182, 193, 0.4)' : 'rgba(255, 255, 255, 0.2)',
+        left: p.x + "%",
+        top: p.y + "%",
+        x: springX,
+        y: springY,
+        opacity: p.opacity,
+        filter: p.id % 5 === 0 ? "blur(2px)" : "none"
+      }}
+      animate={{
+        y: [null, "-40vh"],
+        opacity: [0, p.opacity, 0],
+      }}
+      transition={{
+        duration: p.duration,
+        repeat: Infinity,
+        ease: "linear",
+        delay: p.delay
+      }}
+    />
+  );
+};
+
 const BackgroundParticles = () => {
   const { scrollY } = useScroll();
-  const yRange = useTransform(scrollY, [0, 1000], [0, -200]);
-  const springY = useSpring(yRange, { damping: 50, stiffness: 200 });
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseX.set(e.clientX / window.innerWidth - 0.5);
+      mouseY.set(e.clientY / window.innerHeight - 0.5);
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [mouseX, mouseY]);
+
+  const scrollYTransform = useTransform(scrollY, [0, 1000], [0, -150]);
+  const springScrollY = useSpring(scrollYTransform, { damping: 50, stiffness: 200 });
 
   return (
     <motion.div 
-      style={{ y: springY }}
+      style={{ y: springScrollY }}
       className="fixed inset-0 pointer-events-none overflow-hidden z-0"
     >
       {STATIC_PARTICLES.map((p) => (
-        <motion.div
-          key={p.id}
-          className="absolute w-1 h-1 bg-rose-200/30 rounded-full"
-          initial={{ x: p.x + "%", y: p.y + "%", opacity: p.opacity }}
-          animate={{
-            y: [null, "-20vh"],
-            x: [p.x + "%", (p.x + p.drift) + "%"],
-            opacity: [0, p.opacity, 0],
-          }}
-          transition={{
-            duration: p.duration,
-            repeat: Infinity,
-            ease: "linear",
-            delay: p.delay
-          }}
-        />
+        <Particle key={p.id} p={p} mouseX={mouseX} mouseY={mouseY} />
       ))}
     </motion.div>
   );
