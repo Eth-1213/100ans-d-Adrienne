@@ -309,15 +309,6 @@ const App: React.FC = () => {
             </div>
           </TiltableBubble>
           
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 3.5, duration: 2 }}
-            className="mt-12 text-white/20 text-[11px] font-bold uppercase tracking-[0.6em] text-center"
-          >
-            Un siècle de souvenirs
-          </motion.div>
-          
         </div>
       </main>
     </>
