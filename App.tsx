@@ -58,7 +58,7 @@ const BackgroundParticles = () => {
   );
 };
 
-const TiltableBubble: React.FC<{ children: React.ReactNode; className?: string; delay?: number }> = ({ children, className, delay = 0 }) => {
+const TiltableBubble: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -88,6 +88,22 @@ const TiltableBubble: React.FC<{ children: React.ReactNode; className?: string; 
     scaleCard.set(1);
   };
 
+  const variants = {
+    hidden: { opacity: 0, y: 100, scale: 0.9, rotateX: -20 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      scale: 1, 
+      rotateX: 0,
+      transition: {
+        type: "spring",
+        damping: 20,
+        stiffness: 80,
+        duration: 1.2
+      }
+    }
+  };
+
   return (
     <motion.div 
       ref={containerRef} 
@@ -101,14 +117,7 @@ const TiltableBubble: React.FC<{ children: React.ReactNode; className?: string; 
         scaleZ: scaleCard,
         transformStyle: "preserve-3d"
       }}
-      initial={{ opacity: 0, y: 50 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ 
-        type: "spring",
-        damping: 25,
-        stiffness: 100,
-        delay: delay,
-      }}
+      variants={variants}
       className={`perspective-container ${className} w-full`}
     >
       <div className="tilt-card h-full w-full relative overflow-hidden rounded-[2.5rem]">
@@ -153,10 +162,27 @@ const StaggeredText: React.FC<{ text: string; className?: string; delay?: number
 
 const App: React.FC = () => {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [showStart, setShowStart] = useState(false);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch((e) => {
+        console.error(`Error attempting to enable full-screen mode: ${e.message} (${e.name})`);
+      });
+    }
+  };
+
+  const handleStart = () => {
+    toggleFullscreen();
+    setIsLoaded(true);
+  };
+
   const bubbleBaseClasses = "bg-black/40 backdrop-blur-3xl rounded-[2.5rem] shadow-2xl shadow-black/50 border border-white/10 w-full transition-colors duration-700 ease-out hover:border-white/30";
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoaded(true), 1200);
+    const timer = setTimeout(() => {
+      setShowStart(true);
+    }, 1200);
     return () => clearTimeout(timer);
   }, []);
 
@@ -173,47 +199,87 @@ const App: React.FC = () => {
             transition={{ duration: 0.8, ease: [0.43, 0.13, 0.23, 0.96] }}
             className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#050505]"
           >
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0, filter: "blur(10px)" }}
-              animate={{ scale: 1, opacity: 1, filter: "blur(0px)" }}
-              transition={{ duration: 0.6 }}
-              className="text-7xl font-black tracking-tighter text-white"
-            >
-              100
-            </motion.div>
-            <motion.div 
-              className="w-12 h-[2px] bg-white/20 mt-4 overflow-hidden rounded-full"
-            >
+            <div className="flex flex-col items-center">
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0, filter: "blur(10px)" }}
+                animate={{ scale: 1, opacity: 1, filter: "blur(0px)" }}
+                transition={{ duration: 0.6 }}
+                className="text-7xl font-black tracking-tighter text-white"
+              >
+                100
+              </motion.div>
               <motion.div 
-                className="h-full bg-white"
-                initial={{ x: "-100%" }}
-                animate={{ x: "100%" }}
-                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-              />
-            </motion.div>
+                className="w-12 h-[2px] bg-white/20 mt-4 overflow-hidden rounded-full"
+              >
+                <motion.div 
+                  className="h-full bg-white"
+                  initial={{ x: "-100%" }}
+                  animate={{ x: "100%" }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                />
+              </motion.div>
+            </div>
+
+            <AnimatePresence>
+              {showStart && (
+                <motion.button
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  onClick={handleStart}
+                  className="absolute bottom-24 px-8 py-3 bg-white text-black font-black uppercase tracking-[0.3em] text-xs rounded-full hover:scale-105 active:scale-95 transition-transform"
+                >
+                  Ouvrir l'invitation
+                </motion.button>
+              )}
+            </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>
 
       <main className="min-h-screen w-full flex items-start justify-center p-6 antialiased relative">
-        <div className="max-w-md w-full z-10 flex flex-col items-center gap-10 py-24">
+        {/* Fullscreen Toggle */}
+        <button 
+          onClick={toggleFullscreen}
+          className="fixed top-6 right-6 z-30 p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-white/40 hover:text-white/80 transition-all duration-300"
+          title="Plein écran"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+          </svg>
+        </button>
+
+        <AnimatePresence>
+          {isLoaded && (
+            <motion.div 
+              initial="hidden"
+              animate="visible"
+              variants={{
+                visible: {
+                  transition: {
+                    staggerChildren: 0.15
+                  }
+                }
+              }}
+              className="max-w-md w-full z-10 flex flex-col items-center gap-10 py-24"
+            >
           
-          <TiltableBubble className="w-full" delay={1.5}>
+          <TiltableBubble className="w-full">
             <div className={`${bubbleBaseClasses} p-10 text-center`}>
               <StaggeredText 
                 text="Vous êtes invité" 
                 className="text-sm font-black uppercase tracking-[0.5em] text-white/90 mb-4"
-                delay={1.8}
+                delay={0.2}
               />
               <StaggeredText 
                 text="à la fête d'anniversaire de" 
                 className="text-xl font-medium text-slate-300"
-                delay={2.0}
+                delay={0.4}
               />
             </div>
           </TiltableBubble>
 
-          <TiltableBubble className="w-full" delay={1.7}>
+          <TiltableBubble className="w-full">
             <div className={`${bubbleBaseClasses} py-12 px-4 text-center overflow-hidden relative group`}>
               <motion.div 
                 className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1500 ease-in-out"
@@ -224,7 +290,7 @@ const App: React.FC = () => {
               <motion.div 
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 2.5, type: "spring" }}
+                transition={{ delay: 0.6, type: "spring" }}
                 className="flex items-center justify-center gap-4"
               >
                 <div className="h-px w-8 bg-white/10" />
@@ -236,7 +302,7 @@ const App: React.FC = () => {
             </div>
           </TiltableBubble>
           
-          <TiltableBubble className="w-full" delay={1.9}>
+          <TiltableBubble className="w-full">
              <div className={`${bubbleBaseClasses} p-8 flex items-center space-x-6`}>
                 <motion.div 
                   whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1, x: [0, -2, 2, 0], y: [0, -2, 2, 0] }}
@@ -257,7 +323,7 @@ const App: React.FC = () => {
               </div>
           </TiltableBubble>
           
-          <TiltableBubble className="w-full" delay={2.1}>
+          <TiltableBubble className="w-full">
             <div className="relative group">
               <a 
                 href="https://www.google.com/maps?q=Restaurant+DA+ETTORE+Promenade+des+Champs-Frechets+13+Meyrin+Suisse" 
@@ -309,8 +375,10 @@ const App: React.FC = () => {
             </div>
           </TiltableBubble>
           
-        </div>
-      </main>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  </main>
     </>
   );
 };
