@@ -473,8 +473,10 @@ const AppContent: React.FC = () => {
 
       <main className="min-h-[100dvh] w-full flex items-start justify-center p-6 antialiased relative z-10">
         {/* Fullscreen Toggle */}
-        <button 
+        <motion.button 
           onClick={toggleFullscreen}
+          whileTap={{ scale: 0.9, opacity: 0.8 }}
+          whileHover={{ scale: 1.1 }}
           aria-label="Basculer en plein écran"
           className="fixed top-6 right-6 z-30 p-3 bg-black/20 backdrop-blur-md hover:bg-black/40 border border-rose-200/10 rounded-full text-rose-200/60 hover:text-rose-200 transition-all duration-300"
           style={{ WebkitBackdropFilter: 'blur(12px)' }}
@@ -483,7 +485,7 @@ const AppContent: React.FC = () => {
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
           </svg>
-        </button>
+        </motion.button>
 
         <AnimatePresence>
           {isLoaded && (
