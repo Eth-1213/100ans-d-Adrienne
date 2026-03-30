@@ -120,17 +120,18 @@ const TiltableBubble: React.FC<{ children: React.ReactNode; className?: string }
   };
 
   const variants = {
-    hidden: { opacity: 0, y: 100, scale: 0.9, rotateX: -20 },
+    hidden: { opacity: 0, y: 100, scale: 0.9, rotateX: -45, rotateY: 10 },
     visible: { 
       opacity: 1, 
       y: 0, 
       scale: 1, 
       rotateX: 0,
+      rotateY: 0,
       transition: {
         type: "spring",
-        damping: 20,
-        stiffness: 80,
-        duration: 1.2
+        damping: 25,
+        stiffness: 70,
+        duration: 1.5
       }
     }
   };
@@ -146,23 +147,30 @@ const TiltableBubble: React.FC<{ children: React.ReactNode; className?: string }
         rotateX,
         rotateY,
         scaleZ: scaleCard,
-        transformStyle: "preserve-3d"
+        transformStyle: "preserve-3d",
+        perspective: "1200px"
       }}
       variants={variants}
-      className={`perspective-container ${className} w-full`}
+      className={`perspective-container ${className} w-full relative z-10`}
     >
-      <div className="tilt-card h-full w-full relative overflow-hidden rounded-[2.5rem]">
+      <div 
+        className="tilt-card h-full w-full relative rounded-[2.5rem] transform-gpu shadow-[0_20px_40px_rgba(0,0,0,0.15)] border border-white/10" 
+        style={{ transformStyle: "preserve-3d", backfaceVisibility: "hidden" }}
+      >
         {/* Dynamic Glow Effect */}
         <motion.div 
-          className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+          className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-20"
           style={{
             background: useTransform(
               [mouseX, mouseY],
-              ([x, y]) => `radial-gradient(600px circle at ${((x as number) + 0.5) * 100}% ${((y as number) + 0.5) * 100}%, rgba(255,255,255,0.08), transparent 40%)`
-            )
+              ([x, y]) => `radial-gradient(600px circle at ${((x as number) + 0.5) * 100}% ${((y as number) + 0.5) * 100}%, rgba(255,255,255,0.05), transparent 40%)`
+            ),
+            transform: "translateZ(80px)"
           }}
         />
-        {children}
+        <div style={{ transform: "translateZ(40px)", transformStyle: "preserve-3d" }}>
+          {children}
+        </div>
       </div>
     </motion.div>
   );
@@ -192,21 +200,33 @@ const StaggeredText: React.FC<{ text: string; className?: string; delay?: number
 };
 
 const Background = () => (
-  <div 
-    className="fixed inset-0 z-[-1] bg-[#0d0d0d]"
-    style={{
-      backgroundImage: "linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1522383225653-ed111181a951?q=80&w=2076&auto=format&fit=crop')",
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-      backgroundAttachment: "fixed"
-    }}
-  />
+  <div className="fixed inset-0 z-[-1] overflow-hidden bg-[#050505]">
+    <motion.div 
+      className="absolute inset-0 opacity-40 scale-110"
+      style={{
+        backgroundImage: 'url("https://images.unsplash.com/photo-1522383225653-ed111181a951?q=80&w=2076&auto=format&fit=crop")',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        perspective: "1000px"
+      }}
+      animate={{
+        rotateX: [0, 2, 0, -2, 0],
+        rotateY: [0, -2, 0, 2, 0],
+        scale: [1.1, 1.15, 1.1],
+      }}
+      transition={{
+        duration: 20,
+        repeat: Infinity,
+        ease: "easeInOut"
+      }}
+    />
+    <div className="absolute inset-0 bg-gradient-to-b from-[#050505]/80 via-transparent to-[#050505]/90" />
+  </div>
 );
 
 const App: React.FC = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [showStart, setShowStart] = useState(false);
-  const [isOpeningMap, setIsOpeningMap] = useState(false);
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -221,18 +241,7 @@ const App: React.FC = () => {
     setIsLoaded(true);
   };
 
-  const handleOpenMap = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsOpeningMap(true);
-    
-    // Wait for animation then open map
-    setTimeout(() => {
-      window.open("https://www.google.com/maps?q=Restaurant+DA+ETTORE+Promenade+des+Champs-Frechets+13+Meyrin+Suisse", "_blank", "noopener,noreferrer");
-      setIsOpeningMap(false);
-    }, 2000);
-  };
-
-  const bubbleBaseClasses = "bg-black/30 backdrop-blur-xl rounded-[2.5rem] shadow-2xl shadow-black/50 border border-rose-200/10 w-full transition-colors duration-700 ease-out hover:border-rose-200/30 hover:bg-black/40";
+  const bubbleBaseClasses = "w-full transition-all duration-700 ease-out";
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -246,44 +255,6 @@ const App: React.FC = () => {
       <Background />
       <BackgroundParticles />
 
-      <AnimatePresence>
-        {isOpeningMap && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/80 backdrop-blur-xl"
-          >
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: "spring", damping: 12 }}
-              className="relative"
-            >
-              <div className="w-24 h-24 rounded-full border-2 border-rose-200/20 flex items-center justify-center">
-                <motion.div
-                  animate={{ 
-                    scale: [1, 1.5, 1],
-                    opacity: [0.3, 0.1, 0.3]
-                  }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="absolute inset-0 bg-rose-200 rounded-full"
-                />
-                <LocationMarkerIcon className="w-10 h-10 text-rose-200" />
-              </div>
-            </motion.div>
-            <motion.p
-              initial={{ y: 10, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="mt-8 font-serif italic text-xl text-rose-100 tracking-wide"
-            >
-              Ouverture de la carte...
-            </motion.p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      
       <AnimatePresence mode="wait">
         {!isLoaded && (
           <motion.div 
@@ -293,12 +264,13 @@ const App: React.FC = () => {
             transition={{ duration: 0.8, ease: [0.43, 0.13, 0.23, 0.96] }}
             className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#050505]"
           >
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center" style={{ perspective: "1000px" }}>
               <motion.div
-                initial={{ scale: 0.8, opacity: 0, filter: "blur(10px)" }}
-                animate={{ scale: 1, opacity: 1, filter: "blur(0px)" }}
-                transition={{ duration: 0.6 }}
+                initial={{ scale: 0.8, opacity: 0, filter: "blur(10px)", rotateY: -90 }}
+                animate={{ scale: 1, opacity: 1, filter: "blur(0px)", rotateY: 0 }}
+                transition={{ duration: 1.2, ease: "easeOut" }}
                 className="text-8xl font-serif font-bold tracking-tighter text-rose-100"
+                style={{ transformStyle: "preserve-3d" }}
               >
                 100
               </motion.div>
@@ -316,22 +288,30 @@ const App: React.FC = () => {
 
             <AnimatePresence>
               {showStart && (
-                <motion.button
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
-                  onClick={handleStart}
-                  className="absolute bottom-24 px-8 py-3 bg-transparent border border-rose-200/30 text-rose-100 hover:bg-rose-200/10 font-medium uppercase tracking-[0.3em] text-xs rounded-full hover:scale-105 active:scale-95 transition-all"
+                <motion.div
+                  initial={{ opacity: 0, y: 20, rotateX: 45 }}
+                  animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                  transition={{ delay: 0.5, type: "spring" }}
+                  style={{ perspective: "1000px", transformStyle: "preserve-3d" }}
+                  className="absolute bottom-24"
                 >
-                  Ouvrir l'invitation
-                </motion.button>
+                  <motion.button
+                    onClick={handleStart}
+                    whileHover={{ scale: 1.05, translateZ: 20 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-8 py-3 bg-transparent border border-rose-200/30 text-rose-100 hover:bg-rose-200/10 font-medium uppercase tracking-[0.3em] text-xs rounded-full transition-all shadow-[0_0_20px_rgba(255,182,193,0.1)]"
+                    style={{ transformStyle: "preserve-3d" }}
+                  >
+                    Ouvrir l'invitation
+                  </motion.button>
+                </motion.div>
               )}
             </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <main className="min-h-screen w-full flex items-start justify-center p-6 antialiased relative">
+      <main className="min-h-screen w-full flex items-start justify-center p-6 antialiased relative z-10">
         {/* Fullscreen Toggle */}
         <button 
           onClick={toggleFullscreen}
@@ -374,21 +354,25 @@ const App: React.FC = () => {
           </TiltableBubble>
 
           <TiltableBubble className="w-full">
-            <div className={`${bubbleBaseClasses} py-12 px-4 text-center overflow-hidden relative group`}>
+            <div className={`${bubbleBaseClasses} py-12 px-4 text-center overflow-hidden relative group rounded-[2.5rem]`}>
               <motion.div 
                 className="absolute inset-0 bg-gradient-to-r from-transparent via-rose-200/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1500 ease-in-out"
               />
-              <h1 className="font-serif text-6xl sm:text-8xl font-bold bg-gradient-to-b from-rose-50 via-rose-200 to-rose-400 text-transparent bg-clip-text leading-tight tracking-tight mb-6 px-2">
+              <h1 
+                className="font-serif text-6xl sm:text-8xl font-bold bg-gradient-to-b from-rose-50 via-rose-200 to-rose-400 text-transparent bg-clip-text leading-tight tracking-tight mb-6 px-2"
+                style={{ transform: "translateZ(60px)" }}
+              >
                 Adrienne
               </h1>
               <motion.div 
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, scale: 0.9, translateZ: -20 }}
+                animate={{ opacity: 1, scale: 1, translateZ: 0 }}
                 transition={{ delay: 0.6, type: "spring" }}
                 className="flex items-center justify-center gap-6"
+                style={{ transformStyle: "preserve-3d" }}
               >
                 <div className="h-px w-12 bg-rose-200/20" />
-                <p className="font-serif italic text-4xl text-rose-200 tracking-tight">
+                <p className="font-serif italic text-4xl text-rose-200 tracking-tight" style={{ transform: "translateZ(40px)" }}>
                   100 ans
                 </p>
                 <div className="h-px w-12 bg-rose-200/20" />
@@ -397,7 +381,7 @@ const App: React.FC = () => {
           </TiltableBubble>
           
           <TiltableBubble className="w-full">
-             <div className={`${bubbleBaseClasses} p-8 flex items-center space-x-6`}>
+             <div className={`${bubbleBaseClasses} p-8 flex items-center space-x-6 rounded-[2.5rem]`}>
                 <motion.div 
                   whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1, x: [0, -2, 2, 0], y: [0, -2, 2, 0] }}
                   transition={{ 
@@ -406,7 +390,7 @@ const App: React.FC = () => {
                     y: { duration: 0.4 },
                     scale: { type: "spring", stiffness: 300, damping: 10 }
                   }}
-                  className="flex-shrink-0 bg-rose-900/20 text-rose-200 rounded-[1.25rem] p-5 border border-rose-200/20 shadow-inner cursor-pointer"
+                  className="flex-shrink-0 bg-white/5 text-rose-200 rounded-[1.25rem] p-5 shadow-inner cursor-pointer border border-white/5"
                 >
                   <CalendarIcon className="w-8 h-8" />
                 </motion.div>
@@ -418,11 +402,13 @@ const App: React.FC = () => {
           </TiltableBubble>
           
           <TiltableBubble className="w-full">
-            <div className="relative group">
-              <div 
-                onClick={handleOpenMap}
-                style={{ transform: "translateZ(10px)" }}
-                className={`${bubbleBaseClasses} p-8 flex items-center space-x-6 hover:bg-rose-200/[0.08] group cursor-pointer relative z-10 pointer-events-auto`}
+            <div className="relative group rounded-[2.5rem]">
+              <a 
+                href="https://maps.google.com/?q=Restaurant+DA+ETTORE+Meyrin+Suisse"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ transform: "translateZ(60px)", transformStyle: "preserve-3d" }}
+                className={`${bubbleBaseClasses} p-8 flex items-center space-x-6 group cursor-pointer relative z-30 pointer-events-auto block no-underline rounded-[2.5rem]`}
               >
                 <motion.div 
                   whileHover={{ scale: 1.15, x: [0, 2, -2, 0], y: [0, 2, -2, 0] }}
@@ -431,11 +417,11 @@ const App: React.FC = () => {
                     y: { duration: 0.4 },
                     scale: { type: "spring", stiffness: 300, damping: 10 }
                   }}
-                  className="flex-shrink-0 bg-rose-900/20 text-rose-200 rounded-[1.25rem] p-5 border border-rose-200/20 group-hover:border-rose-200/40 transition-all duration-500"
+                  className="flex-shrink-0 bg-white/5 text-rose-200 rounded-[1.25rem] p-5 group-hover:bg-white/10 transition-all duration-500 pointer-events-none border border-white/5"
                 >
                   <LocationMarkerIcon className="w-8 h-8" />
                 </motion.div>
-                <div className="text-left">
+                <div className="text-left pointer-events-none">
                   <h3 className="font-serif font-bold text-3xl text-rose-50 tracking-tight">Restaurant DA ETTORE</h3>
                   <p className="text-rose-200/80 font-medium text-base mt-1">
                     Promenade des Champs-Fréchets 13, 1217 Meyrin, Suisse
@@ -444,26 +430,7 @@ const App: React.FC = () => {
                     <span className="underline decoration-rose-200/30 underline-offset-8">Voir sur la carte</span>
                   </p>
                 </div>
-              </div>
-              
-              {/* Fallback Copy Button */}
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigator.clipboard.writeText("Restaurant DA ETTORE, Promenade des Champs-Fréchets 13, 1217 Meyrin, Suisse");
-                  const btn = e.currentTarget;
-                  const originalText = btn.innerText;
-                  btn.innerText = "Adresse copiée !";
-                  btn.classList.add("text-green-400");
-                  setTimeout(() => {
-                    btn.innerText = originalText;
-                    btn.classList.remove("text-green-400");
-                  }, 2000);
-                }}
-                className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] text-rose-200/40 uppercase tracking-[0.2em] hover:text-rose-200/80 transition-colors duration-300 z-20"
-              >
-                Copier l'adresse
-              </button>
+              </a>
             </div>
           </TiltableBubble>
           
