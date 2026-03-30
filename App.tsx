@@ -301,13 +301,16 @@ const App: React.FC = () => {
                 initial={{ scale: 0, rotate: -180 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ type: "spring", stiffness: 260, damping: 20 }}
-                className="relative z-10 w-28 h-28 bg-white rounded-full flex items-center justify-center shadow-[0_0_60px_rgba(255,255,255,0.3)]"
+                className="relative z-10 w-28 h-28 bg-white/10 backdrop-blur-md border border-rose-100/20 rounded-full flex items-center justify-center shadow-[0_0_80px_rgba(255,255,255,0.15)]"
               >
-                {/* Google Maps Stylized Icon */}
+                {/* New Google Maps Pin Icon in Rose-200 */}
                 <svg viewBox="0 0 24 24" className="w-14 h-14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#EA4335"/>
-                  <circle cx="12" cy="9" r="2.5" fill="#fff"/>
-                  <path d="M12 2c-3.87 0-7 3.13-7 7 0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#4285F4" opacity="0.2"/>
+                  <path 
+                    fillRule="evenodd" 
+                    clipRule="evenodd" 
+                    d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 13C9.79086 13 8 11.2091 8 9C8 6.79086 9.79086 5 12 5C14.2091 5 16 6.79086 16 9C16 11.2091 14.2091 13 12 13Z" 
+                    fill="#fecdd3"
+                  />
                 </svg>
               </motion.div>
 
