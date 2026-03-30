@@ -107,7 +107,8 @@ const TiltableBubble: React.FC<{ children: React.ReactNode; className?: string }
   const scrollOpacity = useTransform(scrollYProgress, [0, 0.1, 0.9, 1], [0, 1, 1, 0]);
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    const { left, top, width, height } = containerRef.current!.getBoundingClientRect();
+    if (!containerRef.current) return;
+    const { left, top, width, height } = containerRef.current.getBoundingClientRect();
     mouseX.set((e.clientX - left) / width - 0.5);
     mouseY.set((e.clientY - top) / height - 0.5);
     scaleCard.set(1.02);
@@ -224,33 +225,106 @@ const Background = () => (
   </div>
 );
 
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  componentDidCatch(error: any, errorInfo: any) {
+    console.error("App Error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="fixed inset-0 bg-[#050505] flex items-center justify-center p-6 text-center">
+          <div className="max-w-xs">
+            <h2 className="text-rose-100 text-xl font-serif mb-4">Oups ! Quelque chose s'est mal passé.</h2>
+            <p className="text-rose-200/60 text-sm mb-6">L'application a rencontré une erreur. Veuillez rafraîchir la page.</p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="px-6 py-2 border border-rose-200/30 text-rose-100 rounded-full text-xs uppercase tracking-widest"
+            >
+              Rafraîchir
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 const App: React.FC = () => {
+  return (
+    <ErrorBoundary>
+      <AppContent />
+    </ErrorBoundary>
+  );
+};
+
+const AppContent: React.FC = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [showStart, setShowStart] = useState(false);
   const [isOpeningMap, setIsOpeningMap] = useState(false);
+  const mapTimeoutRef1 = useRef<NodeJS.Timeout | null>(null);
+  const mapTimeoutRef2 = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (mapTimeoutRef1.current) clearTimeout(mapTimeoutRef1.current);
+      if (mapTimeoutRef2.current) clearTimeout(mapTimeoutRef2.current);
+    };
+  }, []);
 
   const handleOpenMap = () => {
     if (isOpeningMap) return;
     setIsOpeningMap(true);
     
     // Animation duration before opening
-    setTimeout(() => {
+    mapTimeoutRef1.current = setTimeout(() => {
       window.open("https://maps.google.com/?q=Restaurant+DA+ETTORE+Meyrin+Suisse", "_blank", "noopener,noreferrer");
       // Keep overlay for a bit after opening to feel smooth
-      setTimeout(() => setIsOpeningMap(false), 500);
+      mapTimeoutRef2.current = setTimeout(() => setIsOpeningMap(false), 500);
     }, 2000);
   };
 
   const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch((e) => {
-        console.error(`Error attempting to enable full-screen mode: ${e.message} (${e.name})`);
-      });
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const doc = window.document as any;
+      const docEl = doc.documentElement;
+
+      const requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+      const cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+
+      if (!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+        if (requestFullScreen) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          requestFullScreen.call(docEl).catch((err: any) => console.warn("Fullscreen error:", err));
+        }
+      } else {
+        if (cancelFullScreen) {
+          cancelFullScreen.call(doc);
+        }
+      }
+    } catch (e) {
+      console.warn("Fullscreen API error", e);
     }
   };
 
   const handleStart = () => {
-    toggleFullscreen();
+    try {
+      toggleFullscreen();
+    } catch (e) {
+      console.warn("Fullscreen not supported or failed", e);
+    }
     setIsLoaded(true);
   };
 
@@ -274,7 +348,8 @@ const App: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] bg-[#050505]/95 backdrop-blur-xl flex items-center justify-center overflow-hidden"
+            className="fixed inset-0 z-[200] bg-[#050505]/95 backdrop-blur-xl flex items-center justify-center overflow-hidden h-[100dvh]"
+            style={{ WebkitBackdropFilter: 'blur(24px)' }}
           >
             <div className="relative flex items-center justify-center">
               {/* Expanding Rings (Circles made of a line) */}
@@ -302,6 +377,7 @@ const App: React.FC = () => {
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ type: "spring", stiffness: 260, damping: 20 }}
                 className="relative z-10 w-28 h-28 bg-white/10 backdrop-blur-md border border-rose-100/20 rounded-full flex items-center justify-center shadow-[0_0_80px_rgba(255,255,255,0.15)]"
+                style={{ WebkitBackdropFilter: 'blur(12px)' }}
               >
                 {/* New Google Maps Pin Icon in Rose-200 */}
                 <svg viewBox="0 0 24 24" className="w-14 h-14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -346,7 +422,7 @@ const App: React.FC = () => {
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, scale: 1.05 }}
             transition={{ duration: 0.8, ease: [0.43, 0.13, 0.23, 0.96] }}
-            className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#050505]"
+            className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#050505] h-[100dvh]"
           >
             <div className="flex flex-col items-center" style={{ perspective: "1000px" }}>
               <motion.div
@@ -395,11 +471,13 @@ const App: React.FC = () => {
         )}
       </AnimatePresence>
 
-      <main className="min-h-screen w-full flex items-start justify-center p-6 antialiased relative z-10">
+      <main className="min-h-[100dvh] w-full flex items-start justify-center p-6 antialiased relative z-10">
         {/* Fullscreen Toggle */}
         <button 
           onClick={toggleFullscreen}
+          aria-label="Basculer en plein écran"
           className="fixed top-6 right-6 z-30 p-3 bg-black/20 backdrop-blur-md hover:bg-black/40 border border-rose-200/10 rounded-full text-rose-200/60 hover:text-rose-200 transition-all duration-300"
+          style={{ WebkitBackdropFilter: 'blur(12px)' }}
           title="Plein écran"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -489,6 +567,15 @@ const App: React.FC = () => {
             <div className="relative group rounded-[2.5rem]">
               <motion.div 
                 onClick={handleOpenMap}
+                role="button"
+                tabIndex={0}
+                aria-label="Ouvrir l'itinéraire sur Google Maps"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleOpenMap();
+                  }
+                }}
                 style={{ transform: "translateZ(60px)", transformStyle: "preserve-3d" }}
                 className={`${bubbleBaseClasses} p-8 flex items-center space-x-6 group cursor-pointer relative z-30 pointer-events-auto block no-underline rounded-[2.5rem] overflow-hidden`}
               >
