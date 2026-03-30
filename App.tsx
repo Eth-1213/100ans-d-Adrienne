@@ -227,6 +227,19 @@ const Background = () => (
 const App: React.FC = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [showStart, setShowStart] = useState(false);
+  const [isOpeningMap, setIsOpeningMap] = useState(false);
+
+  const handleOpenMap = () => {
+    if (isOpeningMap) return;
+    setIsOpeningMap(true);
+    
+    // Animation duration before opening
+    setTimeout(() => {
+      window.open("https://maps.google.com/?q=Restaurant+DA+ETTORE+Meyrin+Suisse", "_blank", "noopener,noreferrer");
+      // Keep overlay for a bit after opening to feel smooth
+      setTimeout(() => setIsOpeningMap(false), 500);
+    }, 2000);
+  };
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -254,6 +267,74 @@ const App: React.FC = () => {
     <>
       <Background />
       <BackgroundParticles />
+
+      <AnimatePresence>
+        {isOpeningMap && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] bg-[#050505]/95 backdrop-blur-xl flex items-center justify-center overflow-hidden"
+          >
+            <div className="relative flex items-center justify-center">
+              {/* Expanding Rings (Circles made of a line) */}
+              {[...Array(5)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ scale: 0.2, opacity: 0 }}
+                  animate={{ 
+                    scale: [0.2, 4], 
+                    opacity: [0, 0.6, 0] 
+                  }}
+                  transition={{ 
+                    duration: 2.5, 
+                    repeat: Infinity, 
+                    delay: i * 0.5,
+                    ease: "easeOut" 
+                  }}
+                  className="absolute w-40 h-40 border border-rose-200/30 rounded-full"
+                />
+              ))}
+
+              {/* Central Circle with Google Maps Icon */}
+              <motion.div
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                className="relative z-10 w-28 h-28 bg-white rounded-full flex items-center justify-center shadow-[0_0_60px_rgba(255,255,255,0.3)]"
+              >
+                {/* Google Maps Stylized Icon */}
+                <svg viewBox="0 0 24 24" className="w-14 h-14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#EA4335"/>
+                  <circle cx="12" cy="9" r="2.5" fill="#fff"/>
+                  <path d="M12 2c-3.87 0-7 3.13-7 7 0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#4285F4" opacity="0.2"/>
+                </svg>
+              </motion.div>
+
+              <motion.div 
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="absolute top-40 flex flex-col items-center gap-2"
+              >
+                <p className="whitespace-nowrap font-serif italic text-rose-100 text-2xl tracking-widest">
+                  Ouverture de la carte...
+                </p>
+                <div className="flex gap-1">
+                  {[0, 1, 2].map((i) => (
+                    <motion.div
+                      key={i}
+                      animate={{ opacity: [0.3, 1, 0.3] }}
+                      transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
+                      className="w-1.5 h-1.5 bg-rose-200 rounded-full"
+                    />
+                  ))}
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence mode="wait">
         {!isLoaded && (
@@ -403,12 +484,10 @@ const App: React.FC = () => {
           
           <TiltableBubble className="w-full">
             <div className="relative group rounded-[2.5rem]">
-              <a 
-                href="https://maps.google.com/?q=Restaurant+DA+ETTORE+Meyrin+Suisse"
-                target="_blank"
-                rel="noopener noreferrer"
+              <motion.div 
+                onClick={handleOpenMap}
                 style={{ transform: "translateZ(60px)", transformStyle: "preserve-3d" }}
-                className={`${bubbleBaseClasses} p-8 flex items-center space-x-6 group cursor-pointer relative z-30 pointer-events-auto block no-underline rounded-[2.5rem]`}
+                className={`${bubbleBaseClasses} p-8 flex items-center space-x-6 group cursor-pointer relative z-30 pointer-events-auto block no-underline rounded-[2.5rem] overflow-hidden`}
               >
                 <motion.div 
                   whileHover={{ scale: 1.15, x: [0, 2, -2, 0], y: [0, 2, -2, 0] }}
@@ -417,20 +496,25 @@ const App: React.FC = () => {
                     y: { duration: 0.4 },
                     scale: { type: "spring", stiffness: 300, damping: 10 }
                   }}
-                  className="flex-shrink-0 bg-white/5 text-rose-200 rounded-[1.25rem] p-5 group-hover:bg-white/10 transition-all duration-500 pointer-events-none border border-white/5"
+                  className="flex-shrink-0 bg-white/5 text-rose-200 rounded-[1.25rem] p-5 group-hover:bg-white/10 transition-all duration-500 pointer-events-none border border-white/5 relative z-10"
                 >
                   <LocationMarkerIcon className="w-8 h-8" />
                 </motion.div>
-                <div className="text-left pointer-events-none">
-                  <h3 className="font-serif font-bold text-3xl text-rose-50 tracking-tight">Restaurant DA ETTORE</h3>
+                
+                <div className="text-left pointer-events-none relative z-10">
+                  <h3 className="font-serif font-bold text-3xl text-rose-50 tracking-tight">
+                    Restaurant DA ETTORE
+                  </h3>
                   <p className="text-rose-200/80 font-medium text-base mt-1">
                     Promenade des Champs-Fréchets 13, 1217 Meyrin, Suisse
                   </p>
                   <p className="text-rose-300/60 font-medium text-sm mt-3 group-hover:text-rose-200 transition-colors duration-300">
-                    <span className="underline decoration-rose-200/30 underline-offset-8">Voir sur la carte</span>
+                    <span className="underline decoration-rose-200/30 underline-offset-8">
+                      Voir sur la carte
+                    </span>
                   </p>
                 </div>
-              </a>
+              </motion.div>
             </div>
           </TiltableBubble>
           
