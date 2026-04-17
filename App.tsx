@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform, useSpring, useMotionValue, MotionValue } from 'motion/react';
-import { CalendarIcon, LocationMarkerIcon } from './components/Icons';
+import { CalendarIcon, LocationMarkerIcon, UtensilsIcon, InformationCircleIcon } from './components/Icons';
 
 // Static particle data with drift properties
 const STATIC_PARTICLES = [
@@ -607,6 +607,72 @@ const AppContent: React.FC = () => {
                   </p>
                 </div>
               </motion.div>
+            </div>
+          </TiltableBubble>
+
+          {/* Menu Section */}
+          <TiltableBubble className="w-full">
+            <div className={`${bubbleBaseClasses} p-8 flex flex-col space-y-6 rounded-[2.5rem]`}>
+              <div className="flex items-center space-x-6">
+                <div className="flex-shrink-0 bg-white/5 text-rose-200 rounded-[1.25rem] p-5 border border-white/5">
+                  <UtensilsIcon className="w-8 h-8" />
+                </div>
+                <h3 className="font-serif font-bold text-3xl text-rose-50 tracking-tight">Le Menu</h3>
+              </div>
+              
+              <div className="grid gap-6 pl-2">
+                <div>
+                  <h4 className="text-rose-200 font-bold uppercase tracking-wider text-xs mb-3">Entrée à choix</h4>
+                  <ul className="text-rose-100/70 space-y-1 text-lg">
+                    <li>• Jambon de Parme</li>
+                    <li>• Tomate Mozzarella</li>
+                    <li>• Cocktail de crevettes</li>
+                  </ul>
+                </div>
+                
+                <div className="h-px w-full bg-rose-200/10" />
+                
+                <div>
+                  <h4 className="text-rose-200 font-bold uppercase tracking-wider text-xs mb-3">Plat à choix</h4>
+                  <ul className="text-rose-100/70 space-y-3 text-lg">
+                    <li>
+                      <span className="block font-medium">Filets de perches frites</span>
+                    </li>
+                    <li>
+                      <span className="block font-medium">Médaillons de bœuf</span>
+                      <span className="text-sm opacity-60 block">Sauces morilles, frites, légumes</span>
+                    </li>
+                  </ul>
+                </div>
+                
+                <div className="h-px w-full bg-rose-200/10" />
+                
+                <div>
+                  <h4 className="text-rose-200 font-bold uppercase tracking-wider text-xs mb-3">Dessert offert</h4>
+                  <p className="text-rose-100 italic text-xl">Surprise</p>
+                </div>
+              </div>
+            </div>
+          </TiltableBubble>
+
+          {/* Note Section */}
+          <TiltableBubble className="w-full">
+            <div className={`${bubbleBaseClasses} p-8 flex items-start space-x-6 rounded-[2.5rem]`}>
+              <div className="flex-shrink-0 bg-white/5 text-rose-200 rounded-[1.25rem] p-5 border border-white/5 mt-1">
+                <InformationCircleIcon className="w-8 h-8" />
+              </div>
+              <div className="text-left space-y-4">
+                <p className="text-rose-100 text-lg leading-relaxed italic">
+                  "Dites-moi ce que vous avez choisi assez rapidement."
+                </p>
+                <div className="h-px w-12 bg-rose-200/20" />
+                <p className="text-rose-200/70 text-base leading-relaxed">
+                  Les 3 enfants les plus jeunes auront le choix sur place.
+                </p>
+                <p className="text-rose-50 font-medium text-lg pt-2">
+                  Dites-moi si c'est OK pour tout le monde !
+                </p>
+              </div>
             </div>
           </TiltableBubble>
           
