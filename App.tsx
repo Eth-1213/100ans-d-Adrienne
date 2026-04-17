@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform, useSpring, useMotionValue, MotionValue } from 'motion/react';
-import { CalendarIcon, LocationMarkerIcon, UtensilsIcon, InformationCircleIcon } from './components/Icons';
+import { Calendar, MapPin, UtensilsCrossed, Info, Maximize, Play } from 'lucide-react';
 
 // Static particle data with drift properties
 const STATIC_PARTICLES = [
@@ -459,9 +459,10 @@ const AppContent: React.FC = () => {
                     onClick={handleStart}
                     whileHover={{ scale: 1.05, translateZ: 20 }}
                     whileTap={{ scale: 0.95 }}
-                    className="px-8 py-3 bg-transparent border border-rose-200/30 text-rose-100 hover:bg-rose-200/10 font-medium uppercase tracking-[0.3em] text-xs rounded-full transition-all shadow-[0_0_20px_rgba(255,182,193,0.1)]"
+                    className="flex items-center gap-3 px-8 py-3 bg-transparent border border-rose-200/30 text-rose-100 hover:bg-rose-200/10 font-medium uppercase tracking-[0.3em] text-xs rounded-full transition-all shadow-[0_0_20px_rgba(255,182,193,0.1)]"
                     style={{ transformStyle: "preserve-3d" }}
                   >
+                    <Play className="w-4 h-4 fill-current" />
                     Ouvrir l'invitation
                   </motion.button>
                 </motion.div>
@@ -482,9 +483,7 @@ const AppContent: React.FC = () => {
           style={{ WebkitBackdropFilter: 'blur(12px)' }}
           title="Plein écran"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-          </svg>
+          <Maximize className="h-5 w-5" />
         </motion.button>
 
         <AnimatePresence>
@@ -554,9 +553,9 @@ const AppContent: React.FC = () => {
                     y: { duration: 0.4 },
                     scale: { type: "spring", stiffness: 300, damping: 10 }
                   }}
-                  className="flex-shrink-0 bg-white/5 text-rose-200 rounded-[1.25rem] p-5 shadow-inner cursor-pointer border border-white/5"
+                  className="flex-shrink-0 bg-rose-500/10 text-rose-200 rounded-[1.25rem] p-5 shadow-[0_0_20px_rgba(244,63,94,0.05)] cursor-pointer border border-rose-500/20"
                 >
-                  <CalendarIcon className="w-8 h-8" />
+                  <Calendar className="w-8 h-8" />
                 </motion.div>
                 <div className="text-left">
                   <h3 className="font-serif font-bold text-3xl text-rose-50 tracking-tight">Samedi 2 Mai</h3>
@@ -588,9 +587,9 @@ const AppContent: React.FC = () => {
                     y: { duration: 0.4 },
                     scale: { type: "spring", stiffness: 300, damping: 10 }
                   }}
-                  className="flex-shrink-0 bg-white/5 text-rose-200 rounded-[1.25rem] p-5 group-hover:bg-white/10 transition-all duration-500 pointer-events-none border border-white/5 relative z-10"
+                  className="flex-shrink-0 bg-rose-500/10 text-rose-200 rounded-[1.25rem] p-5 group-hover:bg-rose-500/20 transition-all duration-500 pointer-events-none border border-rose-500/20 relative z-10 shadow-[0_0_20px_rgba(244,63,94,0.05)]"
                 >
-                  <LocationMarkerIcon className="w-8 h-8" />
+                  <MapPin className="w-8 h-8" />
                 </motion.div>
                 
                 <div className="text-left pointer-events-none relative z-10">
@@ -613,11 +612,14 @@ const AppContent: React.FC = () => {
           {/* Menu Section */}
           <TiltableBubble className="w-full">
             <div className={`${bubbleBaseClasses} p-8 flex flex-col space-y-6 rounded-[2.5rem]`}>
-              <div className="flex items-center space-x-6">
-                <div className="flex-shrink-0 bg-white/5 text-rose-200 rounded-[1.25rem] p-5 border border-white/5">
-                  <UtensilsIcon className="w-8 h-8" />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-6">
+                  <div className="flex-shrink-0 bg-rose-500/10 text-rose-200 rounded-[1.25rem] p-5 border border-rose-500/20 shadow-[0_0_30px_rgba(244,63,94,0.1)]">
+                    <UtensilsCrossed className="w-8 h-8" />
+                  </div>
+                  <h3 className="font-serif font-bold text-3xl text-rose-50 tracking-tight">Le Menu</h3>
                 </div>
-                <h3 className="font-serif font-bold text-3xl text-rose-50 tracking-tight">Le Menu</h3>
+                <div className="hidden sm:block h-px flex-grow mx-8 bg-gradient-to-r from-rose-200/20 to-transparent" />
               </div>
               
               <div className="grid gap-6 pl-2">
@@ -658,8 +660,8 @@ const AppContent: React.FC = () => {
           {/* Note Section */}
           <TiltableBubble className="w-full">
             <div className={`${bubbleBaseClasses} p-8 flex items-start space-x-6 rounded-[2.5rem]`}>
-              <div className="flex-shrink-0 bg-white/5 text-rose-200 rounded-[1.25rem] p-5 border border-white/5 mt-1">
-                <InformationCircleIcon className="w-8 h-8" />
+              <div className="flex-shrink-0 bg-rose-500/10 text-rose-200 rounded-[1.25rem] p-5 border border-rose-500/20 mt-1 shadow-[0_0_20px_rgba(244,63,94,0.05)]">
+                <Info className="w-8 h-8" />
               </div>
               <div className="text-left space-y-4">
                 <p className="text-rose-100 text-lg leading-relaxed italic">
