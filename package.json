@@ -12,6 +12,8 @@
   "dependencies": {
     "@google/genai": "^0.15.0",
     "@tailwindcss/vite": "^4.2.2",
+    "cookie": "^1.1.1",
+    "jsonwebtoken": "^9.0.3",
     "lucide-react": "^1.8.0",
     "motion": "^12.38.0",
     "react": "^19.1.1",
