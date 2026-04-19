@@ -77,7 +77,7 @@ const BackgroundParticles = () => {
   }, [mouseX, mouseY]);
 
   const scrollYTransform = useTransform(scrollY, [0, 1000], [0, -150]);
-  const springScrollY = useSpring(scrollYTransform, { damping: 50, stiffness: 200 });
+  const springScrollY = useSpring(scrollYTransform, { damping: 15, stiffness: 400 });
 
   return (
     <motion.div 
@@ -96,8 +96,8 @@ const TiltableBubble: React.FC<{ children: React.ReactNode; className?: string }
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
-  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [15, -15]), { damping: 20, stiffness: 150 });
-  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-15, 15]), { damping: 20, stiffness: 150 });
+  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [15, -15]), { damping: 15, stiffness: 400 });
+  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-15, 15]), { damping: 15, stiffness: 400 });
   const scaleCard = useSpring(1, { damping: 20, stiffness: 150 });
 
   const { scrollYProgress } = useScroll({
@@ -249,12 +249,15 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
           <div className="max-w-xs">
             <h2 className="text-rose-100 text-xl font-serif mb-4">Oups ! Quelque chose s'est mal passé.</h2>
             <p className="text-rose-200/60 text-sm mb-6">L'application a rencontré une erreur. Veuillez rafraîchir la page.</p>
-            <button 
+            <motion.button 
               onClick={() => window.location.reload()}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              transition={ELASTIC_SPRING}
               className="px-6 py-2 border border-rose-200/30 text-rose-100 rounded-full text-xs uppercase tracking-widest"
             >
               Rafraîchir
-            </button>
+            </motion.button>
           </div>
         </div>
       );
@@ -262,6 +265,8 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
     return this.props.children;
   }
 }
+
+const ELASTIC_SPRING = { type: "spring", stiffness: 400, damping: 15 };
 
 const App: React.FC = () => {
   return (
@@ -363,16 +368,24 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ onClose
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+      transition={ELASTIC_SPRING}
       className="fixed inset-0 z-[300] bg-black/80 backdrop-blur-xl flex items-center justify-center p-6"
     >
       <motion.div
         layoutId="rsvp-container"
+        transition={ELASTIC_SPRING}
         className="bg-[#1a0f0a] border border-white/10 rounded-[3rem] w-full max-w-lg p-8 sm:p-12 relative shadow-2xl overflow-hidden"
       >
         {/* Close Button */}
-        <button onClick={onClose} className="absolute top-8 right-8 text-rose-200/40 hover:text-rose-200 transition-colors z-50">
+        <motion.button 
+          onClick={onClose} 
+          whileHover={{ scale: 1.2, rotate: 90 }}
+          whileTap={{ scale: 0.8 }}
+          transition={ELASTIC_SPRING}
+          className="absolute top-8 right-8 text-rose-200/40 hover:text-rose-200 transition-colors z-50"
+        >
           <X className="w-6 h-6" />
-        </button>
+        </motion.button>
 
         <AnimatePresence mode="wait">
           {isSuccess ? (
@@ -380,6 +393,7 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ onClose
               key="success"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
+              transition={ELASTIC_SPRING}
               className="py-12 text-center"
             >
               <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-emerald-500/30">
@@ -392,7 +406,7 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ onClose
             <motion.div key="form" exit={{ opacity: 0, x: -20 }}>
               {/* Step 1: Who are you? */}
               {step === 1 && !showUpdatePrompt && (
-                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={ELASTIC_SPRING}>
                   <h3 className="text-3xl font-serif font-bold text-rose-50 mb-8 tracking-tight">Qui êtes-vous ?</h3>
                   <div className="space-y-4 mb-8">
                     <select
@@ -407,9 +421,12 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ onClose
                     </select>
                     <p className="text-rose-200/30 text-xs px-2 italic">Veuillez choisir votre nom dans la liste officielle.</p>
                   </div>
-                  <button
+                  <motion.button
                     disabled={!guestName || isSubmitting}
                     onClick={() => checkExistingResponse(guestName)}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={ELASTIC_SPRING}
                     className="w-full py-5 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-50 font-serif text-xl rounded-2xl transition-all flex items-center justify-center gap-3 disabled:opacity-30 disabled:cursor-not-allowed shadow-xl group"
                   >
                     {isSubmitting ? (
@@ -420,13 +437,13 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ onClose
                             <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                         </>
                     )}
-                  </button>
+                  </motion.button>
                 </motion.div>
               )}
 
               {/* Update Prompt */}
               {step === 1 && showUpdatePrompt && (
-                <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
+                <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={ELASTIC_SPRING}>
                   <div className="w-16 h-16 bg-rose-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-rose-500/20">
                     <Info className="w-8 h-8 text-rose-300" />
                   </div>
@@ -434,13 +451,16 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ onClose
                   <p className="text-rose-200/60 text-center italic mb-8">Voulez-vous modifier votre réponse existante ?</p>
                   
                   <div className="space-y-4">
-                    <button
+                    <motion.button
                       onClick={() => { setShowUpdatePrompt(false); setStep(2); }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      transition={ELASTIC_SPRING}
                       className="w-full py-5 bg-rose-500 text-white font-serif text-xl rounded-2xl transition-all shadow-xl shadow-rose-500/20"
                     >
                       Modifier ma réponse
-                    </button>
-                    <button
+                    </motion.button>
+                    <motion.button
                       onClick={() => {
                         onClose();
                         setTimeout(() => {
@@ -449,63 +469,81 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ onClose
                            setShowUpdatePrompt(false);
                         }, 500);
                       }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      transition={ELASTIC_SPRING}
                       className="w-full py-4 text-rose-200/40 text-sm font-bold uppercase tracking-widest hover:text-rose-200 transition-colors"
                     >
                       Annuler
-                    </button>
+                    </motion.button>
                   </div>
                 </motion.div>
               )}
 
               {/* Step 2: Starter Choice */}
               {step === 2 && (
-                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={ELASTIC_SPRING}>
                   <h3 className="text-3xl font-serif font-bold text-rose-50 mb-2 tracking-tight">Quelle entrée souhaitez-vous ?</h3>
                   <p className="text-rose-200/40 italic mb-8">Sélectionnez votre entrée à choix.</p>
                   <div className="space-y-4 mb-8">
-                    <button
+                    <motion.button
                       onClick={() => setStarterChoice('jambon')}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      transition={ELASTIC_SPRING}
                       className={`w-full p-6 rounded-2xl border transition-all flex items-center justify-between ${starterChoice === 'jambon' ? 'bg-rose-500/20 border-rose-500/50 text-rose-50' : 'bg-white/5 border-white/10 text-rose-200/60'}`}
                     >
                       <span className="text-left font-medium text-lg">Jambon de Parme</span>
                       {starterChoice === 'jambon' && <Check className="w-6 h-6 text-rose-300" />}
-                    </button>
-                    <button
+                    </motion.button>
+                    <motion.button
                       onClick={() => setStarterChoice('tomate')}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      transition={ELASTIC_SPRING}
                       className={`w-full p-6 rounded-2xl border transition-all flex items-center justify-between ${starterChoice === 'tomate' ? 'bg-rose-500/20 border-rose-500/50 text-rose-50' : 'bg-white/5 border-white/10 text-rose-200/60'}`}
                     >
                       <span className="text-left font-medium text-lg">Tomate Mozzarella</span>
                       {starterChoice === 'tomate' && <Check className="w-6 h-6 text-rose-300" />}
-                    </button>
-                    <button
+                    </motion.button>
+                    <motion.button
                       onClick={() => setStarterChoice('crevette')}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      transition={ELASTIC_SPRING}
                       className={`w-full p-6 rounded-2xl border transition-all flex items-center justify-between ${starterChoice === 'crevette' ? 'bg-rose-500/20 border-rose-500/50 text-rose-50' : 'bg-white/5 border-white/10 text-rose-200/60'}`}
                     >
                       <span className="text-left font-medium text-lg">Cocktail de crevettes</span>
                       {starterChoice === 'crevette' && <Check className="w-6 h-6 text-rose-300" />}
-                    </button>
+                    </motion.button>
                   </div>
                   <div className="flex gap-4">
-                    <button onClick={() => setStep(1)} className="flex-1 py-4 text-rose-200/40 text-sm font-bold uppercase tracking-widest hover:text-rose-200 transition-colors">Retour</button>
-                    <button
+                    <motion.button onClick={() => setStep(1)} whileHover={{ x: -5 }} transition={ELASTIC_SPRING} className="flex-1 py-4 text-rose-200/40 text-sm font-bold uppercase tracking-widest hover:text-rose-200 transition-colors">Retour</motion.button>
+                    <motion.button
                       disabled={starterChoice === 'none'}
                       onClick={() => setStep(3)}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      transition={ELASTIC_SPRING}
                       className="flex-[2] py-5 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-50 font-serif text-xl rounded-2xl transition-all"
                     >
                       Suivant
-                    </button>
+                    </motion.button>
                   </div>
                 </motion.div>
               )}
 
               {/* Step 3: Meal choice */}
               {step === 3 && (
-                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={ELASTIC_SPRING}>
                   <h3 className="text-3xl font-serif font-bold text-rose-50 mb-2 tracking-tight">Quel plat préférez-vous ?</h3>
                   <p className="text-rose-200/40 italic mb-8">Pour la gestion du traiteur.</p>
                   <div className="space-y-4 mb-8">
-                    <button
+                    <motion.button
                       onClick={() => setMealChoice('perche')}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      transition={ELASTIC_SPRING}
                       className={`w-full p-6 rounded-2xl border transition-all flex items-center justify-between ${mealChoice === 'perche' ? 'bg-rose-500/20 border-rose-500/50 text-rose-50' : 'bg-white/5 border-white/10 text-rose-200/60'}`}
                     >
                       <span className="text-left">
@@ -513,9 +551,12 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ onClose
                         <span className="text-xs opacity-40">Frites</span>
                       </span>
                       {mealChoice === 'perche' && <Check className="w-6 h-6 text-rose-300" />}
-                    </button>
-                    <button
+                    </motion.button>
+                    <motion.button
                       onClick={() => setMealChoice('boeuf')}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      transition={ELASTIC_SPRING}
                       className={`w-full p-6 rounded-2xl border transition-all flex items-center justify-between ${mealChoice === 'boeuf' ? 'bg-rose-500/20 border-rose-500/50 text-rose-50' : 'bg-white/5 border-white/10 text-rose-200/60'}`}
                     >
                       <span className="text-left">
@@ -523,24 +564,27 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ onClose
                         <span className="text-xs opacity-40">Sauce morilles, frites, légumes</span>
                       </span>
                       {mealChoice === 'boeuf' && <Check className="w-6 h-6 text-rose-300" />}
-                    </button>
+                    </motion.button>
                   </div>
                   <div className="flex gap-4">
-                    <button onClick={() => setStep(2)} className="flex-1 py-4 text-rose-200/40 text-sm font-bold uppercase tracking-widest hover:text-rose-200 transition-colors">Retour</button>
-                    <button
+                    <motion.button onClick={() => setStep(2)} whileHover={{ x: -5 }} transition={ELASTIC_SPRING} className="flex-1 py-4 text-rose-200/40 text-sm font-bold uppercase tracking-widest hover:text-rose-200 transition-colors">Retour</motion.button>
+                    <motion.button
                       disabled={mealChoice === 'none'}
                       onClick={() => setStep(4)}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      transition={ELASTIC_SPRING}
                       className="flex-[2] py-5 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-50 font-serif text-xl rounded-2xl transition-all"
                     >
                       Suivant
-                    </button>
+                    </motion.button>
                   </div>
                 </motion.div>
               )}
 
               {/* Step 4: Comment and Submit */}
               {step === 4 && (
-                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={ELASTIC_SPRING}>
                   <h3 className="text-3xl font-serif font-bold text-rose-50 mb-8 tracking-tight">Autre chose à ajouter ?</h3>
                   <textarea
                     value={comment}
@@ -550,19 +594,25 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ onClose
                     className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-rose-50 placeholder:text-rose-200/20 focus:outline-none focus:border-rose-500/50 transition-all text-lg mb-4 resize-none"
                   />
                   
-                  <button 
+                  <motion.button 
                     disabled={isSubmitting}
                     onClick={() => { setComment(''); handleSubmit(); }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={ELASTIC_SPRING}
                     className="w-full mb-8 text-rose-200/40 hover:text-rose-200 text-sm italic transition-colors block text-center underline underline-offset-4 decoration-rose-500/30"
                   >
                     Je n'ai rien de particulier à ajouter
-                  </button>
+                  </motion.button>
 
                   <div className="flex gap-4">
-                    <button onClick={() => setStep(3)} className="flex-1 py-4 text-rose-200/40 text-sm font-bold uppercase tracking-widest hover:text-rose-200 transition-colors">Retour</button>
-                    <button
+                    <motion.button onClick={() => setStep(3)} whileHover={{ x: -5 }} transition={ELASTIC_SPRING} className="flex-1 py-4 text-rose-200/40 text-sm font-bold uppercase tracking-widest hover:text-rose-200 transition-colors">Retour</motion.button>
+                    <motion.button
                       disabled={isSubmitting}
                       onClick={handleSubmit}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      transition={ELASTIC_SPRING}
                       className="flex-[2] py-5 bg-rose-500 text-white hover:bg-rose-600 font-serif text-xl rounded-2xl transition-all flex items-center justify-center gap-3 shadow-xl shadow-rose-500/20"
                     >
                       {isSubmitting ? (
@@ -570,7 +620,7 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ onClose
                       ) : (
                         "Envoyer ma réponse"
                       )}
-                    </button>
+                    </motion.button>
                   </div>
                 </motion.div>
               )}
@@ -771,8 +821,9 @@ const AppContent: React.FC = () => {
                 >
                   <motion.button
                     onClick={handleStart}
-                    whileHover={{ scale: 1.05, translateZ: 20 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.1, translateZ: 30 }}
+                    whileTap={{ scale: 0.9 }}
+                    transition={ELASTIC_SPRING}
                     className="flex items-center gap-3 px-8 py-3 bg-transparent border border-rose-200/30 text-rose-100 hover:bg-rose-200/10 font-medium uppercase tracking-[0.3em] text-xs rounded-full transition-all shadow-[0_0_20px_rgba(255,182,193,0.1)]"
                     style={{ transformStyle: "preserve-3d" }}
                   >
@@ -790,8 +841,9 @@ const AppContent: React.FC = () => {
         {/* Fullscreen Toggle */}
         <motion.button 
           onClick={toggleFullscreen}
-          whileTap={{ scale: 0.9, opacity: 0.8 }}
-          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.8, opacity: 0.8 }}
+          whileHover={{ scale: 1.2 }}
+          transition={ELASTIC_SPRING}
           aria-label="Basculer en plein écran"
           className="fixed top-6 right-6 z-30 p-3 bg-black/20 backdrop-blur-md hover:bg-black/40 border border-rose-200/10 rounded-full text-rose-200/60 hover:text-rose-200 transition-all duration-300"
           style={{ WebkitBackdropFilter: 'blur(12px)' }}
@@ -979,7 +1031,7 @@ const AppContent: React.FC = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.5 }}
-                transition={{ delay: 0.2 }}
+                transition={{ ...ELASTIC_SPRING, delay: 0.2 }}
                 className="w-full pt-8 pb-24 text-center"
               >
                 <motion.button
@@ -987,6 +1039,7 @@ const AppContent: React.FC = () => {
                   onClick={() => setShowRSVPModal(true)}
                   whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(244,63,94,0.3)" }}
                   whileTap={{ scale: 0.95 }}
+                  transition={ELASTIC_SPRING}
                   className="px-12 py-5 bg-rose-500/20 border border-rose-500/40 text-rose-50 font-serif text-xl rounded-[2rem] transition-all flex items-center justify-center gap-4 mx-auto shadow-xl"
                 >
                   <CheckCircle2 className="w-6 h-6 text-rose-200" />
