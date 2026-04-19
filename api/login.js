@@ -24,9 +24,9 @@ export default async function handler(req, res) {
 
   // 4. Set cookie
   const cookie = serialize('admin_token', token, {
-    httpOnly: true,
+    httpOnly: false, // Accessible to client-side scripts for fast redirection
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    sameSite: 'lax', // Use lax for better compatibility after redirection
     maxAge: 60 * 60 * 8, // 8 hours
     path: '/',
   });

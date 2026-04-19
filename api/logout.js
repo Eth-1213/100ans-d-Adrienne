@@ -2,9 +2,9 @@ import { serialize } from 'cookie';
 
 export default async function handler(req, res) {
   const cookie = serialize('admin_token', '', {
-    httpOnly: true,
+    httpOnly: false,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    sameSite: 'lax',
     expires: new Date(0),
     path: '/',
   });
