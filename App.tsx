@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence, useScroll, useTransform, useSpring, useMotionValue, MotionValue } from 'motion/react';
-import { Calendar, MapPin, UtensilsCrossed, Info, Maximize, Play } from 'lucide-react';
+import { motion, AnimatePresence, useScroll, useTransform, useSpring, useMotionValue, MotionValue } from 'framer-motion';
+import { Calendar, MapPin, UtensilsCrossed, Info, Maximize, Play, CheckCircle2 } from 'lucide-react';
 
 // Static particle data with drift properties
 const STATIC_PARTICLES = [
@@ -677,6 +677,26 @@ const AppContent: React.FC = () => {
               </div>
             </div>
           </TiltableBubble>
+
+          {/* RSVP Button Section */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1 }}
+            className="w-full pt-8 pb-24 text-center"
+          >
+            <motion.button
+              whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(244,63,94,0.3)" }}
+              whileTap={{ scale: 0.95 }}
+              className="px-12 py-5 bg-rose-500/20 border border-rose-500/40 text-rose-50 font-serif text-xl rounded-[2rem] transition-all flex items-center justify-center gap-4 mx-auto shadow-xl"
+            >
+              <CheckCircle2 className="w-6 h-6 text-rose-200" />
+              Répondre à l'invitation
+            </motion.button>
+            <p className="text-rose-200/40 text-xs mt-6 uppercase tracking-[0.2em] font-medium">
+              Veuillez répondre avant le 20 Avril
+            </p>
+          </motion.div>
           
         </motion.div>
       )}
