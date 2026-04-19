@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform, useSpring, useMotionValue, MotionValue } from 'motion/react';
 import { Calendar, MapPin, UtensilsCrossed, Info, Maximize, Play, CheckCircle2, X, ChevronRight, Check } from 'lucide-react';
 import { db } from './src/lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, getDocs, doc, setDoc } from 'firebase/firestore';
 
 // Static particle data with drift properties
 const STATIC_PARTICLES = [
@@ -279,28 +279,53 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [existingResponseId, setExistingResponseId] = useState<string | null>(null);
+  const [showUpdatePrompt, setShowUpdatePrompt] = useState(false);
 
-  // Guest list from the provided document
-  const commonGuests = [
-    "Mica", "Katrin", "Roland", "Monique", "Felix", "Eveline",
-    "Sébastien", "Elora", "Mayrine", "Sarah", "Nelson", "Liam",
-    "Axelle", "Sacha", "Ethan", "Adrien", "Manu", "Rachelle",
-    "Isabelle", "Gérard", "Antoinette", "Azim", "Adrienne", "Sandra",
-    "Victor"
-  ];
+  const checkExistingResponse = async (name: string) => {
+    setIsSubmitting(true);
+    try {
+      const q = query(collection(db, 'rsvps'), where('guestName', '==', name));
+      const querySnapshot = await getDocs(q);
+      
+      if (!querySnapshot.empty) {
+        const docData = querySnapshot.docs[0];
+        const data = docData.data();
+        setExistingResponseId(docData.id);
+        setStarterChoice(data.starterChoice || 'none');
+        setMealChoice(data.mealChoice || 'none');
+        setComment(data.comment || '');
+        setShowUpdatePrompt(true);
+      } else {
+        setStep(2);
+      }
+    } catch (error) {
+      console.error("Error checking response:", error);
+      setStep(2);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleSubmit = async () => {
     if (!guestName || starterChoice === 'none' || mealChoice === 'none') return;
     setIsSubmitting(true);
     try {
-      await addDoc(collection(db, 'rsvps'), {
+      const rsvpData = {
         guestName,
         status: 'present',
         starterChoice,
         mealChoice,
         comment,
         createdAt: serverTimestamp()
-      });
+      };
+
+      if (existingResponseId) {
+        await setDoc(doc(db, 'rsvps', existingResponseId), rsvpData);
+      } else {
+        await addDoc(collection(db, 'rsvps'), rsvpData);
+      }
+      
       setIsSuccess(true);
       setTimeout(() => {
         onClose();
@@ -312,6 +337,8 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
           setMealChoice('none');
           setComment('');
           setIsSuccess(false);
+          setExistingResponseId(null);
+          setShowUpdatePrompt(false);
         }, 500);
       }, 2000);
     } catch (error) {
@@ -321,6 +348,15 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
       setIsSubmitting(false);
     }
   };
+
+  // Guest list from the provided document
+  const commonGuests = [
+    "Mica", "Katrin", "Roland", "Monique", "Felix", "Eveline",
+    "Sébastien", "Elora", "Mayrine", "Sarah", "Nelson", "Liam",
+    "Axelle", "Sacha", "Ethan", "Adrien", "Manu", "Rachelle",
+    "Isabelle", "Gérard", "Antoinette", "Azim", "Adrienne", "Sandra",
+    "Victor"
+  ];
 
   if (!isOpen) return null;
 
@@ -358,7 +394,7 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
           ) : (
             <motion.div key="form" exit={{ opacity: 0, x: -20 }}>
               {/* Step 1: Who are you? */}
-              {step === 1 && (
+              {step === 1 && !showUpdatePrompt && (
                 <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
                   <h3 className="text-3xl font-serif font-bold text-rose-50 mb-8 tracking-tight">Qui êtes-vous ?</h3>
                   <div className="space-y-4 mb-8">
@@ -375,13 +411,52 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
                     <p className="text-rose-200/30 text-xs px-2 italic">Veuillez choisir votre nom dans la liste officielle.</p>
                   </div>
                   <button
-                    disabled={!guestName}
-                    onClick={() => setStep(2)}
+                    disabled={!guestName || isSubmitting}
+                    onClick={() => checkExistingResponse(guestName)}
                     className="w-full py-5 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-50 font-serif text-xl rounded-2xl transition-all flex items-center justify-center gap-3 disabled:opacity-30 disabled:cursor-not-allowed shadow-xl group"
                   >
-                    Suivant
-                    <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    {isSubmitting ? (
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                        <>
+                            Suivant
+                            <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        </>
+                    )}
                   </button>
+                </motion.div>
+              )}
+
+              {/* Update Prompt */}
+              {step === 1 && showUpdatePrompt && (
+                <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
+                  <div className="w-16 h-16 bg-rose-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-rose-500/20">
+                    <Info className="w-8 h-8 text-rose-300" />
+                  </div>
+                  <h3 className="text-2xl font-serif font-bold text-rose-50 mb-4 text-center">Vous avez déjà répondu</h3>
+                  <p className="text-rose-200/60 text-center italic mb-8">Voulez-vous modifier votre réponse existante ?</p>
+                  
+                  <div className="space-y-4">
+                    <button
+                      onClick={() => { setShowUpdatePrompt(false); setStep(2); }}
+                      className="w-full py-5 bg-rose-500 text-white font-serif text-xl rounded-2xl transition-all shadow-xl shadow-rose-500/20"
+                    >
+                      Modifier ma réponse
+                    </button>
+                    <button
+                      onClick={() => {
+                        onClose();
+                        setTimeout(() => {
+                           setGuestName('');
+                           setExistingResponseId(null);
+                           setShowUpdatePrompt(false);
+                        }, 500);
+                      }}
+                      className="w-full py-4 text-rose-200/40 text-sm font-bold uppercase tracking-widest hover:text-rose-200 transition-colors"
+                    >
+                      Annuler
+                    </button>
+                  </div>
                 </motion.div>
               )}
 
@@ -896,27 +971,6 @@ const AppContent: React.FC = () => {
                   <h4 className="text-rose-200 font-bold uppercase tracking-wider text-xs mb-3">Dessert offert</h4>
                   <p className="text-rose-100 italic text-xl">Surprise</p>
                 </div>
-              </div>
-            </div>
-          </TiltableBubble>
-
-          {/* Note Section */}
-          <TiltableBubble className="w-full">
-            <div className={`${bubbleBaseClasses} p-8 flex items-start space-x-6 rounded-[2.5rem]`}>
-              <div className="flex-shrink-0 bg-rose-500/10 text-rose-200 rounded-[1.25rem] p-5 border border-rose-500/20 mt-1 shadow-[0_0_20px_rgba(244,63,94,0.05)]">
-                <Info className="w-8 h-8" />
-              </div>
-              <div className="text-left space-y-4">
-                <p className="text-rose-100 text-lg leading-relaxed italic">
-                  "Dites-moi ce que vous avez choisi assez rapidement."
-                </p>
-                <div className="h-px w-12 bg-rose-200/20" />
-                <p className="text-rose-200/70 text-base leading-relaxed">
-                  Les 3 enfants les plus jeunes auront le choix sur place.
-                </p>
-                <p className="text-rose-50 font-medium text-lg pt-2">
-                  Dites-moi si c'est OK pour tout le monde !
-                </p>
               </div>
             </div>
           </TiltableBubble>

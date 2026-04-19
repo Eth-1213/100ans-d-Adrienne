@@ -46,7 +46,7 @@ service cloud.firestore {
       // For this specific setup, we'll allow it from the dashboard.
       allow delete: if true;
       
-      allow update: if false;
+      allow update: if isValidRSVP(request.resource.data);
     }
   }
 }
