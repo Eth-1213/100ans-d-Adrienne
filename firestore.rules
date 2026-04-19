@@ -36,11 +36,13 @@ service cloud.firestore {
       // Anyone can respond to the invitation
       allow create: if isValidRSVP(request.resource.data) && isValidId(rsvpId);
       
-      // Only admin can see the responses
-      allow read: if isAdmin();
+      // Dashboard now fetches without Google Auth, so we allow public read
+      // WARNING: This makes the RSVP data technically public if someone knows the project ID.
+      allow read: if true;
       
-      // Nobody can update or delete responses for now (integrity)
-      allow update, delete: if isAdmin();
+      // Admin verification for updates/deletes should still be handled via Admin SDK if implemented,
+      // but for now we restrict it to false (client side).
+      allow update, delete: if false;
     }
   }
 }
