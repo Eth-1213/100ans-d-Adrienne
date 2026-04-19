@@ -312,15 +312,19 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ onClose
     }
   };
 
+  const youngGuests = ["Adrien", "Liam", "Mayrine"];
+  const isYoungGuest = (name: string) => youngGuests.includes(name);
+
   const handleSubmit = async () => {
-    if (!guestName || starterChoice === 'none' || mealChoice === 'none') return;
+    const isSpecial = isYoungGuest(guestName);
+    if (!guestName || (!isSpecial && (starterChoice === 'none' || mealChoice === 'none'))) return;
     setIsSubmitting(true);
     try {
       const rsvpData = {
         guestName,
         status: 'present',
-        starterChoice,
-        mealChoice,
+        starterChoice: isSpecial ? 'on_site_kids' : starterChoice,
+        mealChoice: isSpecial ? 'on_site_kids' : mealChoice,
         comment,
         createdAt: serverTimestamp()
       };
@@ -483,53 +487,97 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ onClose
               {/* Step 2: Starter Choice */}
               {step === 2 && (
                 <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={ELASTIC_SPRING}>
-                  <h3 className="text-3xl font-serif font-bold text-rose-50 mb-2 tracking-tight">Quelle entrée souhaitez-vous ?</h3>
-                  <p className="text-rose-200/40 italic mb-8">Sélectionnez votre entrée à choix.</p>
-                  <div className="space-y-4 mb-8">
-                    <motion.button
-                      onClick={() => setStarterChoice('jambon')}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      transition={ELASTIC_SPRING}
-                      className={`w-full p-6 rounded-2xl border transition-all flex items-center justify-between ${starterChoice === 'jambon' ? 'bg-rose-500/20 border-rose-500/50 text-rose-50' : 'bg-white/5 border-white/10 text-rose-200/60'}`}
-                    >
-                      <span className="text-left font-medium text-lg">Jambon de Parme</span>
-                      {starterChoice === 'jambon' && <Check className="w-6 h-6 text-rose-300" />}
-                    </motion.button>
-                    <motion.button
-                      onClick={() => setStarterChoice('tomate')}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      transition={ELASTIC_SPRING}
-                      className={`w-full p-6 rounded-2xl border transition-all flex items-center justify-between ${starterChoice === 'tomate' ? 'bg-rose-500/20 border-rose-500/50 text-rose-50' : 'bg-white/5 border-white/10 text-rose-200/60'}`}
-                    >
-                      <span className="text-left font-medium text-lg">Tomate Mozzarella</span>
-                      {starterChoice === 'tomate' && <Check className="w-6 h-6 text-rose-300" />}
-                    </motion.button>
-                    <motion.button
-                      onClick={() => setStarterChoice('crevette')}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      transition={ELASTIC_SPRING}
-                      className={`w-full p-6 rounded-2xl border transition-all flex items-center justify-between ${starterChoice === 'crevette' ? 'bg-rose-500/20 border-rose-500/50 text-rose-50' : 'bg-white/5 border-white/10 text-rose-200/60'}`}
-                    >
-                      <span className="text-left font-medium text-lg">Cocktail de crevettes</span>
-                      {starterChoice === 'crevette' && <Check className="w-6 h-6 text-rose-300" />}
-                    </motion.button>
-                  </div>
-                  <div className="flex gap-4">
-                    <motion.button onClick={() => setStep(1)} whileHover={{ x: -5 }} transition={ELASTIC_SPRING} className="flex-1 py-4 text-rose-200/40 text-sm font-bold uppercase tracking-widest hover:text-rose-200 transition-colors">Retour</motion.button>
-                    <motion.button
-                      disabled={starterChoice === 'none'}
-                      onClick={() => setStep(3)}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      transition={ELASTIC_SPRING}
-                      className="flex-[2] py-5 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-50 font-serif text-xl rounded-2xl transition-all"
-                    >
-                      Suivant
-                    </motion.button>
-                  </div>
+                  {isYoungGuest(guestName) ? (
+                    <>
+                      <h3 className="text-3xl font-serif font-bold text-rose-50 mb-6 tracking-tight text-center">Menu spécial</h3>
+                      <div className="bg-rose-500/10 border border-rose-500/20 rounded-3xl p-8 mb-10">
+                        <p className="text-rose-100 text-xl text-center font-serif leading-relaxed italic">
+                          "Les 3 plus jeunes choisiront directement leur menu sur place !"
+                        </p>
+                      </div>
+                      <div className="flex gap-4">
+                        <motion.button 
+                          onClick={() => setStep(1)} 
+                          whileHover={{ x: -5 }} 
+                          transition={ELASTIC_SPRING} 
+                          className="flex-1 py-4 text-rose-200/40 text-sm font-bold uppercase tracking-widest hover:text-rose-200 transition-colors"
+                        >
+                          Retour
+                        </motion.button>
+                        <motion.button
+                          onClick={() => {
+                            onClose();
+                            // Reset state after closing a bit later to avoid flash
+                            setTimeout(() => {
+                              setStep(1);
+                              setGuestName('');
+                              setStarterChoice('none');
+                              setMealChoice('none');
+                              setComment('');
+                              setExistingResponseId(null);
+                              setShowUpdatePrompt(false);
+                            }, 500);
+                          }}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          transition={ELASTIC_SPRING}
+                          className="flex-[2] py-5 bg-rose-500 text-white font-serif text-xl rounded-2xl transition-all shadow-xl shadow-rose-500/20 flex items-center justify-center gap-2"
+                        >
+                          OK
+                        </motion.button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <h3 className="text-3xl font-serif font-bold text-rose-50 mb-2 tracking-tight">Quelle entrée souhaitez-vous ?</h3>
+                      <p className="text-rose-200/40 italic mb-8">Sélectionnez votre entrée à choix.</p>
+                      <div className="space-y-4 mb-8">
+                        <motion.button
+                          onClick={() => setStarterChoice('jambon')}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          transition={ELASTIC_SPRING}
+                          className={`w-full p-6 rounded-2xl border transition-all flex items-center justify-between ${starterChoice === 'jambon' ? 'bg-rose-500/20 border-rose-500/50 text-rose-50' : 'bg-white/5 border-white/10 text-rose-200/60'}`}
+                        >
+                          <span className="text-left font-medium text-lg">Jambon de Parme</span>
+                          {starterChoice === 'jambon' && <Check className="w-6 h-6 text-rose-300" />}
+                        </motion.button>
+                        <motion.button
+                          onClick={() => setStarterChoice('tomate')}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          transition={ELASTIC_SPRING}
+                          className={`w-full p-6 rounded-2xl border transition-all flex items-center justify-between ${starterChoice === 'tomate' ? 'bg-rose-500/20 border-rose-500/50 text-rose-50' : 'bg-white/5 border-white/10 text-rose-200/60'}`}
+                        >
+                          <span className="text-left font-medium text-lg">Tomate Mozzarella</span>
+                          {starterChoice === 'tomate' && <Check className="w-6 h-6 text-rose-300" />}
+                        </motion.button>
+                        <motion.button
+                          onClick={() => setStarterChoice('crevette')}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          transition={ELASTIC_SPRING}
+                          className={`w-full p-6 rounded-2xl border transition-all flex items-center justify-between ${starterChoice === 'crevette' ? 'bg-rose-500/20 border-rose-500/50 text-rose-50' : 'bg-white/5 border-white/10 text-rose-200/60'}`}
+                        >
+                          <span className="text-left font-medium text-lg">Cocktail de crevettes</span>
+                          {starterChoice === 'crevette' && <Check className="w-6 h-6 text-rose-300" />}
+                        </motion.button>
+                      </div>
+                      <div className="flex gap-4">
+                        <motion.button onClick={() => setStep(1)} whileHover={{ x: -5 }} transition={ELASTIC_SPRING} className="flex-1 py-4 text-rose-200/40 text-sm font-bold uppercase tracking-widest hover:text-rose-200 transition-colors">Retour</motion.button>
+                        <motion.button
+                          disabled={starterChoice === 'none'}
+                          onClick={() => setStep(3)}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          transition={ELASTIC_SPRING}
+                          className="flex-[2] py-5 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-50 font-serif text-xl rounded-2xl transition-all"
+                        >
+                          Suivant
+                        </motion.button>
+                      </div>
+                    </>
+                  )}
                 </motion.div>
               )}
 
@@ -606,7 +654,7 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ onClose
                   </motion.button>
 
                   <div className="flex gap-4">
-                    <motion.button onClick={() => setStep(3)} whileHover={{ x: -5 }} transition={ELASTIC_SPRING} className="flex-1 py-4 text-rose-200/40 text-sm font-bold uppercase tracking-widest hover:text-rose-200 transition-colors">Retour</motion.button>
+                    <motion.button onClick={() => setStep(isYoungGuest(guestName) ? 2 : 3)} whileHover={{ x: -5 }} transition={ELASTIC_SPRING} className="flex-1 py-4 text-rose-200/40 text-sm font-bold uppercase tracking-widest hover:text-rose-200 transition-colors">Retour</motion.button>
                     <motion.button
                       disabled={isSubmitting}
                       onClick={handleSubmit}
