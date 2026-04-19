@@ -1,0 +1,46 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && 
+             request.auth.token.email == 'saea.2021.7@gmail.com' && 
+             request.auth.token.email_verified == true;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // RSVP Validation
+    function isValidRSVP(data) {
+      return data.keys().hasAll(['guestName', 'status', 'mealChoice', 'comment', 'createdAt']) &&
+             data.keys().size() == 5 &&
+             data.guestName is string && data.guestName.size() >= 2 && data.guestName.size() <= 100 &&
+             data.status in ['present', 'absent'] &&
+             data.mealChoice in ['perche', 'boeuf', 'none'] &&
+             data.comment is string && data.comment.size() <= 500 &&
+             data.createdAt == request.time;
+    }
+
+    match /rsvps/{rsvpId} {
+      // Anyone can respond to the invitation
+      allow create: if isValidRSVP(request.resource.data) && isValidId(rsvpId);
+      
+      // Only admin can see the responses
+      allow read: if isAdmin();
+      
+      // Nobody can update or delete responses for now (integrity)
+      allow update, delete: if isAdmin();
+    }
+  }
+}

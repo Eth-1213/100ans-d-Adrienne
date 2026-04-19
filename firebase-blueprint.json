@@ -1,0 +1,23 @@
+{
+  "entities": {
+    "RSVP": {
+      "title": "RSVP",
+      "description": "Guest RSVP response",
+      "type": "object",
+      "properties": {
+        "guestName": { "type": "string" },
+        "status": { "type": "string", "enum": ["present", "absent"] },
+        "mealChoice": { "type": "string", "enum": ["perche", "boeuf", "none"] },
+        "comment": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["guestName", "status", "createdAt"]
+    }
+  },
+  "firestore": {
+    "rsvps/{rsvpId}": {
+      "schema": "RSVP",
+      "description": "Collection of RSVP responses"
+    }
+  }
+}
