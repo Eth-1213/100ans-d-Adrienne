@@ -53,6 +53,11 @@
             </div>
         </div>
         <div class="flex items-center space-x-8">
+            <button id="fullscreenBtn" class="text-xs uppercase tracking-[0.2em] font-bold text-rose-200/50 hover:text-rose-200 transition-colors flex items-center gap-2">
+                <svg id="fs-maximize" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+                <svg id="fs-minimize" class="hidden" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg>
+                Plein écran
+            </button>
             <a href="/" class="text-xs uppercase tracking-[0.2em] font-bold text-rose-200/50 hover:text-rose-200 transition-colors">Voir le site</a>
             <button id="logoutBtn" class="text-xs uppercase tracking-[0.2em] font-bold text-rose-400/80 hover:text-rose-400 transition-colors bg-rose-400/10 px-4 py-2 rounded-lg border border-rose-400/20">Déconnexion</button>
         </div>
@@ -71,13 +76,25 @@
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-            <div class="bg-white/5 backdrop-blur-md p-8 rounded-[2rem] border border-white/10 shadow-xl">
-                <p class="text-xs font-semibold uppercase tracking-[0.3em] text-rose-200/40 mb-3">Confirmés</p>
-                <p id="totalConfirmed" class="text-4xl font-light text-rose-50">0</p>
+            <div class="bg-emerald-500/10 backdrop-blur-md p-8 rounded-[2rem] border border-emerald-500/20 shadow-xl">
+                <p class="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-200/40 mb-3">Total Confirmés</p>
+                <div class="flex items-baseline gap-2">
+                    <p id="totalConfirmed" class="text-4xl font-light text-emerald-50">0</p>
+                    <span class="text-emerald-500/40 text-sm">invités</span>
+                </div>
             </div>
             <div class="bg-white/5 backdrop-blur-md p-8 rounded-[2rem] border border-white/10 shadow-xl">
-                <p class="text-xs font-semibold uppercase tracking-[0.3em] text-rose-200/40 mb-3">Absents</p>
-                <p id="totalPending" class="text-4xl font-light text-rose-50/40">0</p>
+                <p class="text-xs font-semibold uppercase tracking-[0.3em] text-rose-200/40 mb-3">Statistiques Plats</p>
+                <div class="flex gap-6 group">
+                   <div class="flex flex-col">
+                       <span id="countPerche" class="text-2xl text-rose-50 font-light">0</span>
+                       <span class="text-[10px] uppercase text-rose-200/30 font-bold">Perche</span>
+                   </div>
+                   <div class="flex flex-col">
+                       <span id="countBoeuf" class="text-2xl text-rose-50 font-light">0</span>
+                       <span class="text-[10px] uppercase text-rose-200/30 font-bold">Bœuf</span>
+                   </div>
+                </div>
             </div>
         </div>
 
@@ -91,7 +108,7 @@
                     <thead>
                         <tr class="text-xs uppercase tracking-widest text-rose-200/40 border-b border-white/5">
                             <th class="px-10 py-6 font-bold">Invité</th>
-                            <th class="px-6 py-6 font-bold">Statut</th>
+                            <th class="px-6 py-6 font-bold">Entrée</th>
                             <th class="px-6 py-6 font-bold">Plat choisi</th>
                             <th class="px-6 py-6 font-bold">Commentaire</th>
                             <th class="px-6 py-6 font-bold">Date</th>
@@ -130,19 +147,28 @@
 
         const rsvpTableBody = document.getElementById('rsvpTableBody');
         const totalConfirmedEl = document.getElementById('totalConfirmed');
-        const totalPendingEl = document.getElementById('totalPending');
+        const countPercheEl = document.getElementById('countPerche');
+        const countBoeufEl = document.getElementById('countBoeuf');
 
         // Dynamic data rendering
         const q = query(collection(db, "rsvps"), orderBy("createdAt", "desc"));
         onSnapshot(q, (snapshot) => {
             let confirmedCount = 0;
-            let absentCount = 0;
+            let percheCount = 0;
+            let boeufCount = 0;
             let rowsHtml = '';
 
             snapshot.forEach((doc) => {
                 const rsvp = doc.data();
-                if (rsvp.status === 'present') confirmedCount++;
-                else absentCount++;
+                confirmedCount++;
+                if (rsvp.mealChoice === 'perche') percheCount++;
+                if (rsvp.mealChoice === 'boeuf') boeufCount++;
+
+                const starterLabel = {
+                    'jambon': 'Jambon Parme',
+                    'tomate': 'Tomate Mozza',
+                    'crevette': 'Crevettes'
+                }[rsvp.starterChoice] || '—';
 
                 const formattedDate = rsvp.createdAt?.toDate 
                     ? rsvp.createdAt.toDate().toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) 
@@ -152,12 +178,10 @@
                     <tr class="border-b border-white/5 hover:bg-white/5 transition-colors group">
                         <td class="px-10 py-6 font-serif text-lg text-rose-50">${rsvp.guestName}</td>
                         <td class="px-6 py-6">
-                            <span class="px-3 py-1 ${rsvp.status === 'present' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'} border rounded-full text-[10px] font-bold uppercase tracking-widest">
-                                ${rsvp.status === 'present' ? 'Présent' : 'Absent'}
-                            </span>
+                            <span class="text-xs font-bold uppercase tracking-widest text-rose-200/60">${starterLabel}</span>
                         </td>
-                        <td class="px-6 py-6 text-sm">${rsvp.mealChoice === 'perche' ? 'Perche' : rsvp.mealChoice === 'boeuf' ? 'Bœuf' : '—'}</td>
-                        <td class="px-6 py-6 text-sm italic opacity-60">${rsvp.comment || '—'}</td>
+                        <td class="px-6 py-6 text-sm text-rose-100/90">${rsvp.mealChoice === 'perche' ? 'Perche' : rsvp.mealChoice === 'boeuf' ? 'Bœuf' : '—'}</td>
+                        <td class="px-6 py-6 text-sm italic opacity-60 max-w-xs truncate">${rsvp.comment || '—'}</td>
                         <td class="px-6 py-6 text-[10px] opacity-40">${formattedDate}</td>
                         <td class="px-10 py-6 text-right">
                             <button onclick="window.deleteRSVP('${doc.id}')" class="text-rose-400/50 hover:text-rose-400 transition-colors p-2 rounded-lg hover:bg-rose-400/10">
@@ -170,7 +194,8 @@
 
             rsvpTableBody.innerHTML = rowsHtml || '<tr><td colspan="6" class="py-20 text-center text-rose-200/20 italic">Aucune réponse pour le moment</td></tr>';
             totalConfirmedEl.textContent = confirmedCount;
-            totalPendingEl.textContent = absentCount;
+            countPercheEl.textContent = percheCount;
+            countBoeufEl.textContent = boeufCount;
         });
 
         // Global delete function
@@ -189,6 +214,33 @@
         document.getElementById('logoutBtn').addEventListener('click', async () => {
             await fetch('/api/logout');
             window.location.href = '/admin/index.html';
+        });
+
+        // Fullscreen toggle
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const fsMaximize = document.getElementById('fs-maximize');
+        const fsMinimize = document.getElementById('fs-minimize');
+
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch((err) => {
+                    console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        });
+
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                fsMaximize.classList.add('hidden');
+                fsMinimize.classList.remove('hidden');
+            } else {
+                fsMaximize.classList.remove('hidden');
+                fsMinimize.classList.add('hidden');
+            }
         });
     </script>
 </body>

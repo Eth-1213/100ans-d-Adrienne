@@ -274,7 +274,7 @@ const App: React.FC = () => {
 const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
   const [step, setStep] = useState(1);
   const [guestName, setGuestName] = useState('');
-  const [status, setStatus] = useState<'present' | 'absent' | null>(null);
+  const [starterChoice, setStarterChoice] = useState<'jambon' | 'tomate' | 'crevette' | 'none'>('none');
   const [mealChoice, setMealChoice] = useState<'perche' | 'boeuf' | 'none'>('none');
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -290,13 +290,14 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
   ];
 
   const handleSubmit = async () => {
-    if (!guestName || !status) return;
+    if (!guestName || starterChoice === 'none' || mealChoice === 'none') return;
     setIsSubmitting(true);
     try {
       await addDoc(collection(db, 'rsvps'), {
         guestName,
-        status,
-        mealChoice: status === 'present' ? mealChoice : 'none',
+        status: 'present',
+        starterChoice,
+        mealChoice,
         comment,
         createdAt: serverTimestamp()
       });
@@ -384,31 +385,39 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
                 </motion.div>
               )}
 
-              {/* Step 2: Present or Absent? */}
+              {/* Step 2: Starter Choice */}
               {step === 2 && (
                 <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-                  <h3 className="text-3xl font-serif font-bold text-rose-50 mb-8 tracking-tight">Serez-vous présent ?</h3>
-                  <div className="grid grid-cols-2 gap-4 mb-8">
+                  <h3 className="text-3xl font-serif font-bold text-rose-50 mb-2 tracking-tight">Quelle entrée souhaitez-vous ?</h3>
+                  <p className="text-rose-200/40 italic mb-8">Sélectionnez votre entrée à choix.</p>
+                  <div className="space-y-4 mb-8">
                     <button
-                      onClick={() => setStatus('present')}
-                      className={`p-6 rounded-3xl border transition-all text-center ${status === 'present' ? 'bg-rose-500/20 border-rose-500/50 text-rose-50' : 'bg-white/5 border-white/10 text-rose-200/60'}`}
+                      onClick={() => setStarterChoice('jambon')}
+                      className={`w-full p-6 rounded-2xl border transition-all flex items-center justify-between ${starterChoice === 'jambon' ? 'bg-rose-500/20 border-rose-500/50 text-rose-50' : 'bg-white/5 border-white/10 text-rose-200/60'}`}
                     >
-                      <CheckCircle2 className={`w-8 h-8 mx-auto mb-3 ${status === 'present' ? 'text-rose-300' : 'text-rose-200/20'}`} />
-                      <span className="font-medium text-lg">Présent</span>
+                      <span className="text-left font-medium text-lg">Jambon de Parme</span>
+                      {starterChoice === 'jambon' && <Check className="w-6 h-6 text-rose-300" />}
                     </button>
                     <button
-                      onClick={() => setStatus('absent')}
-                      className={`p-6 rounded-3xl border transition-all text-center ${status === 'absent' ? 'bg-rose-500/20 border-rose-500/50 text-rose-50' : 'bg-white/5 border-white/10 text-rose-200/60'}`}
+                      onClick={() => setStarterChoice('tomate')}
+                      className={`w-full p-6 rounded-2xl border transition-all flex items-center justify-between ${starterChoice === 'tomate' ? 'bg-rose-500/20 border-rose-500/50 text-rose-50' : 'bg-white/5 border-white/10 text-rose-200/60'}`}
                     >
-                      <X className={`w-8 h-8 mx-auto mb-3 ${status === 'absent' ? 'text-rose-300' : 'text-rose-200/20'}`} />
-                      <span className="font-medium text-lg">Désolé</span>
+                      <span className="text-left font-medium text-lg">Tomate Mozzarella</span>
+                      {starterChoice === 'tomate' && <Check className="w-6 h-6 text-rose-300" />}
+                    </button>
+                    <button
+                      onClick={() => setStarterChoice('crevette')}
+                      className={`w-full p-6 rounded-2xl border transition-all flex items-center justify-between ${starterChoice === 'crevette' ? 'bg-rose-500/20 border-rose-500/50 text-rose-50' : 'bg-white/5 border-white/10 text-rose-200/60'}`}
+                    >
+                      <span className="text-left font-medium text-lg">Cocktail de crevettes</span>
+                      {starterChoice === 'crevette' && <Check className="w-6 h-6 text-rose-300" />}
                     </button>
                   </div>
                   <div className="flex gap-4">
                     <button onClick={() => setStep(1)} className="flex-1 py-4 text-rose-200/40 text-sm font-bold uppercase tracking-widest hover:text-rose-200 transition-colors">Retour</button>
                     <button
-                      disabled={!status}
-                      onClick={() => status === 'present' ? setStep(3) : setStep(4)}
+                      disabled={starterChoice === 'none'}
+                      onClick={() => setStep(3)}
                       className="flex-[2] py-5 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-50 font-serif text-xl rounded-2xl transition-all"
                     >
                       Suivant
@@ -417,7 +426,7 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
                 </motion.div>
               )}
 
-              {/* Step 3: Meal choice (only if present) */}
+              {/* Step 3: Meal choice */}
               {step === 3 && (
                 <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
                   <h3 className="text-3xl font-serif font-bold text-rose-50 mb-2 tracking-tight">Quel plat préférez-vous ?</h3>
@@ -468,7 +477,7 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
                     className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-rose-50 placeholder:text-rose-200/20 focus:outline-none focus:border-rose-500/50 transition-all text-lg mb-8 resize-none"
                   />
                   <div className="flex gap-4">
-                    <button onClick={() => status === 'present' ? setStep(3) : setStep(2)} className="flex-1 py-4 text-rose-200/40 text-sm font-bold uppercase tracking-widest hover:text-rose-200 transition-colors">Retour</button>
+                    <button onClick={() => setStep(3)} className="flex-1 py-4 text-rose-200/40 text-sm font-bold uppercase tracking-widest hover:text-rose-200 transition-colors">Retour</button>
                     <button
                       disabled={isSubmitting}
                       onClick={handleSubmit}
