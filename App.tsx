@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence, useScroll, useTransform, useSpring, useMotionValue, MotionValue } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform, useSpring, useMotionValue, MotionValue } from 'motion/react';
 import { Calendar, MapPin, UtensilsCrossed, Info, Maximize, Play, CheckCircle2 } from 'lucide-react';
 
 // Static particle data with drift properties
