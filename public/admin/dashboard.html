@@ -94,7 +94,8 @@
                             <th class="px-6 py-6 font-bold">Statut</th>
                             <th class="px-6 py-6 font-bold">Plat choisi</th>
                             <th class="px-6 py-6 font-bold">Commentaire</th>
-                            <th class="px-10 py-6 font-bold text-right">Date</th>
+                            <th class="px-6 py-6 font-bold">Date</th>
+                            <th class="px-10 py-6 font-bold text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="rsvpTableBody" class="text-rose-100/80">
@@ -112,7 +113,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, query, orderBy, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // Firebase configuration
         const firebaseConfig = {
@@ -157,15 +158,32 @@
                         </td>
                         <td class="px-6 py-6 text-sm">${rsvp.mealChoice === 'perche' ? 'Perche' : rsvp.mealChoice === 'boeuf' ? 'Bœuf' : '—'}</td>
                         <td class="px-6 py-6 text-sm italic opacity-60">${rsvp.comment || '—'}</td>
-                        <td class="px-10 py-6 text-right text-[10px] opacity-40">${formattedDate}</td>
+                        <td class="px-6 py-6 text-[10px] opacity-40">${formattedDate}</td>
+                        <td class="px-10 py-6 text-right">
+                            <button onclick="window.deleteRSVP('${doc.id}')" class="text-rose-400/50 hover:text-rose-400 transition-colors p-2 rounded-lg hover:bg-rose-400/10">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                            </button>
+                        </td>
                     </tr>
                 `;
             });
 
-            rsvpTableBody.innerHTML = rowsHtml || '<tr><td colspan="5" class="py-20 text-center text-rose-200/20 italic">Aucune réponse pour le moment</td></tr>';
+            rsvpTableBody.innerHTML = rowsHtml || '<tr><td colspan="6" class="py-20 text-center text-rose-200/20 italic">Aucune réponse pour le moment</td></tr>';
             totalConfirmedEl.textContent = confirmedCount;
             totalPendingEl.textContent = absentCount;
         });
+
+        // Global delete function
+        window.deleteRSVP = async (id) => {
+            if (confirm('Voulez-vous vraiment supprimer cette réponse ?')) {
+                try {
+                    await deleteDoc(doc(db, "rsvps", id));
+                } catch (err) {
+                    console.error('Error deleting document:', err);
+                    alert('Erreur lors de la suppression.');
+                }
+            }
+        };
 
         // Logout handler
         document.getElementById('logoutBtn').addEventListener('click', async () => {

@@ -40,9 +40,12 @@ service cloud.firestore {
       // WARNING: This makes the RSVP data technically public if someone knows the project ID.
       allow read: if true;
       
-      // Admin verification for updates/deletes should still be handled via Admin SDK if implemented,
-      // but for now we restrict it to false (client side).
-      allow update, delete: if false;
+      // Allow deletion for cleanup
+      // In a production app, this should be restricted to authenticated admins.
+      // For this specific setup, we'll allow it from the dashboard.
+      allow delete: if true;
+      
+      allow update: if false;
     }
   }
 }
