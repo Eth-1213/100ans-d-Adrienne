@@ -221,7 +221,7 @@
         const fsMaximize = document.getElementById('fs-maximize');
         const fsMinimize = document.getElementById('fs-minimize');
 
-        fullscreenBtn.addEventListener('click', () => {
+        const toggleFullscreen = () => {
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen().catch((err) => {
                     console.error(`Error attempting to enable full-screen mode: ${err.message}`);
@@ -231,7 +231,20 @@
                     document.exitFullscreen();
                 }
             }
-        });
+        };
+
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+        // Automatic fullscreen on first interaction
+        const autoFullscreen = () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            }
+            document.removeEventListener('click', autoFullscreen);
+            document.removeEventListener('touchstart', autoFullscreen);
+        };
+        document.addEventListener('click', autoFullscreen);
+        document.addEventListener('touchstart', autoFullscreen);
 
         document.addEventListener('fullscreenchange', () => {
             if (document.fullscreenElement) {

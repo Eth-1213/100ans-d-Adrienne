@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
+        .font-serif { font-family: 'Playfair Display', serif; }
         .pin-btn {
             width: 100%;
             aspect-ratio: 1 / 1;
@@ -25,16 +26,51 @@
         }
         .pin-btn:hover { background-color: rgba(255, 255, 255, 0.1); }
         .pin-btn:active { transform: scale(0.95); }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fadeIn 1s ease-out forwards; }
     </style>
 </head>
 <body class="bg-[#0a0502] min-h-screen flex items-center justify-center p-4 overflow-hidden relative">
+    <script>
+        // Check if already logged in and auto-redirect if so
+        // But only if we are NOT already in the process of logging in
+        if (location.search !== '?login') {
+            fetch('/api/check-auth').then(res => {
+                if (res.ok) window.location.href = '/admin/dashboard.html';
+            });
+        }
+    </script>
     <!-- Atmospheric background -->
     <div class="fixed inset-0 pointer-events-none">
         <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-rose-500/10 blur-[120px] rounded-full"></div>
         <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-rose-500/10 blur-[120px] rounded-full"></div>
     </div>
 
-    <div class="relative bg-white/5 backdrop-blur-2xl p-10 rounded-[2.5rem] border border-white/10 shadow-2xl w-full max-w-md text-center">
+    <!-- Splash Screen -->
+    <div id="splashContainer" class="relative z-20 flex flex-col items-center">
+        <div class="mb-12 text-center animate-fade-in">
+            <div class="inline-flex p-6 rounded-3xl bg-rose-500/10 text-rose-200 border border-rose-500/20 mb-8 shadow-2xl">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <h1 class="text-4xl sm:text-6xl font-serif font-bold text-rose-50 mb-4 tracking-tighter">Accès Restreint</h1>
+            <p class="text-rose-200/40 uppercase tracking-[0.4em] text-xs font-bold">Administration Privée</p>
+        </div>
+        
+        <button 
+            id="startAdminBtn"
+            class="px-12 py-6 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-50 font-serif text-2xl rounded-[2.5rem] transition-all flex items-center justify-center gap-4 shadow-2xl group active:scale-95"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:rotate-12 transition-transform"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+            Ouvrir le panneau
+        </button>
+    </div>
+
+    <!-- Auth Form (Hidden initially) -->
+    <div id="authContainer" class="hidden relative bg-white/5 backdrop-blur-2xl p-10 rounded-[2.5rem] border border-white/10 shadow-2xl w-full max-w-md text-center">
         <div class="mb-10">
             <div class="inline-flex p-4 rounded-2xl bg-rose-500/10 text-rose-200 border border-rose-500/20 mb-6">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -89,8 +125,29 @@
     </div>
 
     <script>
+        const splashContainer = document.getElementById('splashContainer');
+        const authContainer = document.getElementById('authContainer');
+        const startAdminBtn = document.getElementById('startAdminBtn');
         const passwordInput = document.getElementById('password');
         const errorEl = document.getElementById('error');
+
+        startAdminBtn.addEventListener('click', () => {
+            // Request fullscreen
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            }
+            
+            // Transition UI
+            splashContainer.style.opacity = '0';
+            splashContainer.style.transform = 'translateY(-20px)';
+            splashContainer.style.transition = 'all 0.5s ease-out';
+            
+            setTimeout(() => {
+                splashContainer.classList.add('hidden');
+                authContainer.classList.remove('hidden');
+                authContainer.classList.add('animate-fade-in');
+            }, 500);
+        });
 
         window.appendPin = (val) => {
             if (passwordInput.value.length < 12) {
@@ -134,11 +191,6 @@
                 errorEl.textContent = 'Erreur réseau';
                 errorEl.classList.remove('hidden');
             }
-        });
-
-        // Check if already logged in
-        fetch('/api/check-auth').then(res => {
-            if (res.ok) window.location.href = '/admin/dashboard.html';
         });
     </script>
 </body>
