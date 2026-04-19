@@ -361,20 +361,17 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
                 <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
                   <h3 className="text-3xl font-serif font-bold text-rose-50 mb-8 tracking-tight">Qui êtes-vous ?</h3>
                   <div className="space-y-4 mb-8">
-                    <input
-                      type="text"
-                      list="guest-datalist"
+                    <select
                       value={guestName}
                       onChange={(e) => setGuestName(e.target.value)}
-                      placeholder="Votre nom..."
-                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-rose-50 placeholder:text-rose-200/20 focus:outline-none focus:border-rose-500/50 transition-all text-lg"
-                    />
-                    <datalist id="guest-datalist">
-                      {commonGuests.map((name) => (
-                        <option key={name} value={name} />
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-rose-50 focus:outline-none focus:border-rose-500/50 transition-all text-lg appearance-none cursor-pointer"
+                    >
+                      <option value="" disabled className="bg-[#1a0f0a]">Sélectionnez votre nom...</option>
+                      {commonGuests.sort().map((name) => (
+                        <option key={name} value={name} className="bg-[#1a0f0a]">{name}</option>
                       ))}
-                    </datalist>
-                    <p className="text-rose-200/30 text-xs px-2 italic">Sélectionnez dans la liste ou écrivez votre nom.</p>
+                    </select>
+                    <p className="text-rose-200/30 text-xs px-2 italic">Veuillez choisir votre nom dans la liste officielle.</p>
                   </div>
                   <button
                     disabled={!guestName}
