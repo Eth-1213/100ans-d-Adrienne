@@ -137,11 +137,6 @@
         const errorEl = document.getElementById('error');
 
         startAdminBtn.addEventListener('click', () => {
-            // Request fullscreen
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(() => {});
-            }
-            
             // Transition UI
             splashContainer.style.opacity = '0';
             splashContainer.style.transform = 'translateY(-20px)';
