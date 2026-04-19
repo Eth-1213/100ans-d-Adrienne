@@ -437,7 +437,8 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
                       className={`w-full p-6 rounded-2xl border transition-all flex items-center justify-between ${mealChoice === 'perche' ? 'bg-rose-500/20 border-rose-500/50 text-rose-50' : 'bg-white/5 border-white/10 text-rose-200/60'}`}
                     >
                       <span className="text-left">
-                        <span className="block font-medium text-lg">Filets de perche frites</span>
+                        <span className="block font-medium text-lg">Filets de perche</span>
+                        <span className="text-xs opacity-40">Frites</span>
                       </span>
                       {mealChoice === 'perche' && <Check className="w-6 h-6 text-rose-300" />}
                     </button>
@@ -447,7 +448,7 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
                     >
                       <span className="text-left">
                         <span className="block font-medium text-lg">Médaillons de bœuf</span>
-                        <span className="text-xs opacity-40">Sauce morilles</span>
+                        <span className="text-xs opacity-40">Sauce morilles, frites, légumes</span>
                       </span>
                       {mealChoice === 'boeuf' && <Check className="w-6 h-6 text-rose-300" />}
                     </button>
@@ -468,14 +469,23 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
               {/* Step 4: Comment and Submit */}
               {step === 4 && (
                 <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-                  <h3 className="text-3xl font-serif font-bold text-rose-50 mb-8 tracking-tight">Dernier mot ?</h3>
+                  <h3 className="text-3xl font-serif font-bold text-rose-50 mb-8 tracking-tight">Autre chose à ajouter ?</h3>
                   <textarea
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
-                    placeholder="Un allergie ? Un petit message pour Adrienne ?"
+                    placeholder="Votre message..."
                     rows={4}
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-rose-50 placeholder:text-rose-200/20 focus:outline-none focus:border-rose-500/50 transition-all text-lg mb-8 resize-none"
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-rose-50 placeholder:text-rose-200/20 focus:outline-none focus:border-rose-500/50 transition-all text-lg mb-4 resize-none"
                   />
+                  
+                  <button 
+                    disabled={isSubmitting}
+                    onClick={() => { setComment(''); handleSubmit(); }}
+                    className="w-full mb-8 text-rose-200/40 hover:text-rose-200 text-sm italic transition-colors block text-center underline underline-offset-4 decoration-rose-500/30"
+                  >
+                    Je n'ai rien de particulier à ajouter
+                  </button>
+
                   <div className="flex gap-4">
                     <button onClick={() => setStep(3)} className="flex-1 py-4 text-rose-200/40 text-sm font-bold uppercase tracking-widest hover:text-rose-200 transition-colors">Retour</button>
                     <button
@@ -870,11 +880,12 @@ const AppContent: React.FC = () => {
                   <h4 className="text-rose-200 font-bold uppercase tracking-wider text-xs mb-3">Plat à choix</h4>
                   <ul className="text-rose-100/70 space-y-3 text-lg">
                     <li>
-                      <span className="block font-medium">Filets de perches frites</span>
+                      <span className="block font-medium">Filets de perche</span>
+                      <span className="text-sm opacity-60 block">Frites</span>
                     </li>
                     <li>
                       <span className="block font-medium">Médaillons de bœuf</span>
-                      <span className="text-sm opacity-60 block">Sauces morilles, frites, légumes</span>
+                      <span className="text-sm opacity-60 block">Sauce morilles, frites, légumes</span>
                     </li>
                   </ul>
                 </div>
