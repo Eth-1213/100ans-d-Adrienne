@@ -271,7 +271,7 @@ const App: React.FC = () => {
   );
 };
 
-const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
+const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ onClose }) => {
   const [step, setStep] = useState(1);
   const [guestName, setGuestName] = useState('');
   const [starterChoice, setStarterChoice] = useState<'jambon' | 'tomate' | 'crevette' | 'none'>('none');
@@ -358,8 +358,6 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
     "Victor"
   ];
 
-  if (!isOpen) return null;
-
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -368,12 +366,11 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
       className="fixed inset-0 z-[300] bg-black/80 backdrop-blur-xl flex items-center justify-center p-6"
     >
       <motion.div
-        initial={{ scale: 0.9, y: 20, rotateX: 10 }}
-        animate={{ scale: 1, y: 0, rotateX: 0 }}
-        className="bg-white/5 border border-white/10 rounded-[3rem] w-full max-w-lg p-8 sm:p-12 relative shadow-2xl overflow-hidden"
+        layoutId="rsvp-container"
+        className="bg-[#1a0f0a] border border-white/10 rounded-[3rem] w-full max-w-lg p-8 sm:p-12 relative shadow-2xl overflow-hidden"
       >
         {/* Close Button */}
-        <button onClick={onClose} className="absolute top-8 right-8 text-rose-200/40 hover:text-rose-200 transition-colors">
+        <button onClick={onClose} className="absolute top-8 right-8 text-rose-200/40 hover:text-rose-200 transition-colors z-50">
           <X className="w-6 h-6" />
         </button>
 
@@ -976,24 +973,34 @@ const AppContent: React.FC = () => {
           </TiltableBubble>
 
           {/* RSVP Button Section */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1 }}
-            className="w-full pt-8 pb-24 text-center"
-          >
-            <motion.button
-              onClick={() => setShowRSVPModal(true)}
-              whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(244,63,94,0.3)" }}
-              whileTap={{ scale: 0.95 }}
-              className="px-12 py-5 bg-rose-500/20 border border-rose-500/40 text-rose-50 font-serif text-xl rounded-[2rem] transition-all flex items-center justify-center gap-4 mx-auto shadow-xl"
-            >
-              <CheckCircle2 className="w-6 h-6 text-rose-200" />
-              Répondre à l'invitation
-            </motion.button>
-          </motion.div>
+          <AnimatePresence>
+            {!showRSVPModal && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.5 }}
+                transition={{ delay: 0.2 }}
+                className="w-full pt-8 pb-24 text-center"
+              >
+                <motion.button
+                  layoutId="rsvp-container"
+                  onClick={() => setShowRSVPModal(true)}
+                  whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(244,63,94,0.3)" }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-12 py-5 bg-rose-500/20 border border-rose-500/40 text-rose-50 font-serif text-xl rounded-[2rem] transition-all flex items-center justify-center gap-4 mx-auto shadow-xl"
+                >
+                  <CheckCircle2 className="w-6 h-6 text-rose-200" />
+                  Répondre à l'invitation
+                </motion.button>
+              </motion.div>
+            )}
+          </AnimatePresence>
           
-          <RSVPModal isOpen={showRSVPModal} onClose={() => setShowRSVPModal(false)} />
+          <AnimatePresence>
+            {showRSVPModal && (
+               <RSVPModal isOpen={showRSVPModal} onClose={() => setShowRSVPModal(false)} />
+            )}
+          </AnimatePresence>
           
         </motion.div>
       )}
