@@ -23,10 +23,11 @@ service cloud.firestore {
 
     // RSVP Validation
     function isValidRSVP(data) {
-      return data.keys().hasAll(['guestName', 'status', 'mealChoice', 'comment', 'createdAt']) &&
-             data.keys().size() == 5 &&
+      return data.keys().hasAll(['guestName', 'status', 'starterChoice', 'mealChoice', 'comment', 'createdAt']) &&
+             data.keys().size() == 6 &&
              data.guestName is string && data.guestName.size() >= 2 && data.guestName.size() <= 100 &&
              data.status in ['present', 'absent'] &&
+             data.starterChoice in ['jambon', 'tomate', 'crevette', 'none'] &&
              data.mealChoice in ['perche', 'boeuf', 'none'] &&
              data.comment is string && data.comment.size() <= 500 &&
              data.createdAt == request.time;

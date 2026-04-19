@@ -308,7 +308,7 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
         setTimeout(() => {
           setStep(1);
           setGuestName('');
-          setStatus(null);
+          setStarterChoice('none');
           setMealChoice('none');
           setComment('');
           setIsSuccess(false);
