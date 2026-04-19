@@ -276,7 +276,7 @@ const App: React.FC = () => {
   );
 };
 
-const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ onClose }) => {
+const RSVPModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [step, setStep] = useState(1);
   const [guestName, setGuestName] = useState('');
   const [starterChoice, setStarterChoice] = useState<'jambon' | 'tomate' | 'crevette' | 'none'>('none');
@@ -368,6 +368,308 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ onClose
   ];
 
   return (
+    <>
+      {/* Close Button */}
+      <motion.button 
+        onClick={onClose} 
+        whileHover={{ scale: 1.2, rotate: 90 }}
+        whileTap={{ scale: 0.8 }}
+        transition={ELASTIC_SPRING}
+        className="absolute top-8 right-8 text-rose-200/40 hover:text-rose-200 transition-colors z-50"
+      >
+        <X className="w-6 h-6" />
+      </motion.button>
+
+      <AnimatePresence mode="wait">
+        {isSuccess ? (
+          <motion.div
+            key="success"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={ELASTIC_SPRING}
+            className="py-12 text-center"
+          >
+            <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-emerald-500/30">
+              <Check className="w-10 h-10 text-emerald-400" />
+            </div>
+            <h3 className="text-3xl font-serif font-bold text-rose-50 mb-2">Merci !</h3>
+            <p className="text-rose-200/60 italic text-lg">Votre réponse a bien été enregistrée.</p>
+          </motion.div>
+        ) : (
+          <motion.div key="form" exit={{ opacity: 0, x: -20 }}>
+            {/* Step 1: Who are you? */}
+            {step === 1 && !showUpdatePrompt && (
+              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={ELASTIC_SPRING}>
+                <h3 className="text-3xl font-serif font-bold text-rose-50 mb-8 tracking-tight">Qui êtes-vous ?</h3>
+                <div className="space-y-4 mb-8">
+                  <select
+                    value={guestName}
+                    onChange={(e) => setGuestName(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-rose-50 focus:outline-none focus:border-rose-500/50 transition-all text-lg appearance-none cursor-pointer"
+                  >
+                    <option value="" disabled className="bg-[#1a0f0a]">Sélectionnez votre nom...</option>
+                    {commonGuests.sort().map((name) => (
+                      <option key={name} value={name} className="bg-[#1a0f0a]">{name}</option>
+                    ))}
+                  </select>
+                  <p className="text-rose-200/30 text-xs px-2 italic">Veuillez choisir votre nom dans la liste officielle.</p>
+                </div>
+                <motion.button
+                  disabled={!guestName || isSubmitting}
+                  onClick={() => checkExistingResponse(guestName)}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={ELASTIC_SPRING}
+                  className="w-full py-5 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-50 font-serif text-xl rounded-2xl transition-all flex items-center justify-center gap-3 disabled:opacity-30 disabled:cursor-not-allowed shadow-xl group"
+                >
+                  {isSubmitting ? (
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                      <>
+                          Suivant
+                          <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                      </>
+                  )}
+                </motion.button>
+              </motion.div>
+            )}
+
+            {/* Update Prompt */}
+            {step === 1 && showUpdatePrompt && (
+              <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={ELASTIC_SPRING}>
+                <div className="w-16 h-16 bg-rose-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-rose-500/20">
+                  <Info className="w-8 h-8 text-rose-300" />
+                </div>
+                <h3 className="text-2xl font-serif font-bold text-rose-50 mb-4 text-center">Vous avez déjà répondu</h3>
+                <p className="text-rose-200/60 text-center italic mb-8">Voulez-vous modifier votre réponse existante ?</p>
+                
+                <div className="space-y-4">
+                  <motion.button
+                    onClick={() => { setShowUpdatePrompt(false); setStep(2); }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={ELASTIC_SPRING}
+                    className="w-full py-5 bg-rose-500 text-white font-serif text-xl rounded-2xl transition-all shadow-xl shadow-rose-500/20"
+                  >
+                    Modifier ma réponse
+                  </motion.button>
+                  <motion.button
+                    onClick={() => {
+                      onClose();
+                      setTimeout(() => {
+                         setGuestName('');
+                         setExistingResponseId(null);
+                         setShowUpdatePrompt(false);
+                      }, 500);
+                    }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={ELASTIC_SPRING}
+                    className="w-full py-4 text-rose-200/40 text-sm font-bold uppercase tracking-widest hover:text-rose-200 transition-colors"
+                  >
+                    Annuler
+                  </motion.button>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Step 2: Starter Choice */}
+            {step === 2 && (
+              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={ELASTIC_SPRING}>
+                {isYoungGuest(guestName) ? (
+                  <>
+                    <h3 className="text-3xl font-serif font-bold text-rose-50 mb-6 tracking-tight text-center">Menu spécial</h3>
+                    <div className="bg-rose-500/10 border border-rose-500/20 rounded-3xl p-8 mb-10">
+                      <p className="text-rose-100 text-xl text-center font-serif leading-relaxed italic">
+                        "Les 3 plus jeunes choisiront directement leur menu sur place !"
+                      </p>
+                    </div>
+                    <div className="flex gap-4">
+                      <motion.button 
+                        onClick={() => setStep(1)} 
+                        whileHover={{ x: -5 }} 
+                        transition={ELASTIC_SPRING} 
+                        className="flex-1 py-4 text-rose-200/40 text-sm font-bold uppercase tracking-widest hover:text-rose-200 transition-colors"
+                      >
+                        Retour
+                      </motion.button>
+                      <motion.button
+                        onClick={() => {
+                          onClose();
+                          // Reset state after closing a bit later to avoid flash
+                          setTimeout(() => {
+                            setStep(1);
+                            setGuestName('');
+                            setStarterChoice('none');
+                            setMealChoice('none');
+                            setComment('');
+                            setExistingResponseId(null);
+                            setShowUpdatePrompt(false);
+                          }, 500);
+                        }}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        transition={ELASTIC_SPRING}
+                        className="flex-[2] py-5 bg-rose-500 text-white font-serif text-xl rounded-2xl transition-all shadow-xl shadow-rose-500/20 flex items-center justify-center gap-2"
+                      >
+                        OK
+                      </motion.button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <h3 className="text-3xl font-serif font-bold text-rose-50 mb-2 tracking-tight">Quelle entrée souhaitez-vous ?</h3>
+                    <p className="text-rose-200/40 italic mb-8">Sélectionnez votre entrée à choix.</p>
+                    <div className="space-y-4 mb-8">
+                      <motion.button
+                        onClick={() => setStarterChoice('jambon')}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        transition={ELASTIC_SPRING}
+                        className={`w-full p-6 rounded-2xl border transition-all flex items-center justify-between ${starterChoice === 'jambon' ? 'bg-rose-500/20 border-rose-500/50 text-rose-50' : 'bg-white/5 border-white/10 text-rose-200/60'}`}
+                      >
+                        <span className="text-left font-medium text-lg">Jambon de Parme</span>
+                        {starterChoice === 'jambon' && <Check className="w-6 h-6 text-rose-300" />}
+                      </motion.button>
+                      <motion.button
+                        onClick={() => setStarterChoice('tomate')}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        transition={ELASTIC_SPRING}
+                        className={`w-full p-6 rounded-2xl border transition-all flex items-center justify-between ${starterChoice === 'tomate' ? 'bg-rose-500/20 border-rose-500/50 text-rose-50' : 'bg-white/5 border-white/10 text-rose-200/60'}`}
+                      >
+                        <span className="text-left font-medium text-lg">Tomate Mozzarella</span>
+                        {starterChoice === 'tomate' && <Check className="w-6 h-6 text-rose-300" />}
+                      </motion.button>
+                      <motion.button
+                        onClick={() => setStarterChoice('crevette')}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        transition={ELASTIC_SPRING}
+                        className={`w-full p-6 rounded-2xl border transition-all flex items-center justify-between ${starterChoice === 'crevette' ? 'bg-rose-500/20 border-rose-500/50 text-rose-50' : 'bg-white/5 border-white/10 text-rose-200/60'}`}
+                      >
+                        <span className="text-left font-medium text-lg">Cocktail de crevettes</span>
+                        {starterChoice === 'crevette' && <Check className="w-6 h-6 text-rose-300" />}
+                      </motion.button>
+                    </div>
+                    <div className="flex gap-4">
+                      <motion.button onClick={() => setStep(1)} whileHover={{ x: -5 }} transition={ELASTIC_SPRING} className="flex-1 py-4 text-rose-200/40 text-sm font-bold uppercase tracking-widest hover:text-rose-200 transition-colors">Retour</motion.button>
+                      <motion.button
+                        disabled={starterChoice === 'none'}
+                        onClick={() => setStep(3)}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        transition={ELASTIC_SPRING}
+                        className="flex-[2] py-5 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-50 font-serif text-xl rounded-2xl transition-all"
+                      >
+                        Suivant
+                      </motion.button>
+                    </div>
+                  </>
+                )}
+              </motion.div>
+            )}
+
+            {/* Step 3: Meal choice */}
+            {step === 3 && (
+              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={ELASTIC_SPRING}>
+                <h3 className="text-3xl font-serif font-bold text-rose-50 mb-2 tracking-tight">Quel plat préférez-vous ?</h3>
+                <p className="text-rose-200/40 italic mb-8">Sélectionnez un plat à choix.</p>
+                <div className="space-y-4 mb-8">
+                  <motion.button
+                    onClick={() => setMealChoice('perche')}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={ELASTIC_SPRING}
+                    className={`w-full p-6 rounded-2xl border transition-all flex items-center justify-between ${mealChoice === 'perche' ? 'bg-rose-500/20 border-rose-500/50 text-rose-50' : 'bg-white/5 border-white/10 text-rose-200/60'}`}
+                  >
+                    <span className="text-left">
+                      <span className="block font-medium text-lg">Filets de perche</span>
+                      <span className="text-sm opacity-60 block">Frites</span>
+                    </span>
+                    {mealChoice === 'perche' && <Check className="w-6 h-6 text-rose-300" />}
+                  </motion.button>
+                  <motion.button
+                    onClick={() => setMealChoice('boeuf')}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={ELASTIC_SPRING}
+                    className={`w-full p-6 rounded-2xl border transition-all flex items-center justify-between ${mealChoice === 'boeuf' ? 'bg-rose-500/20 border-rose-500/50 text-rose-50' : 'bg-white/5 border-white/10 text-rose-200/60'}`}
+                  >
+                    <span className="text-left">
+                      <span className="block font-medium text-lg">Médaillons de bœuf</span>
+                      <span className="text-sm opacity-60 block">Sauce morilles, frites, légumes</span>
+                    </span>
+                    {mealChoice === 'boeuf' && <Check className="w-6 h-6 text-rose-300" />}
+                  </motion.button>
+                </div>
+                <div className="flex gap-4">
+                  <motion.button onClick={() => setStep(2)} whileHover={{ x: -5 }} transition={ELASTIC_SPRING} className="flex-1 py-4 text-rose-200/40 text-sm font-bold uppercase tracking-widest hover:text-rose-200 transition-colors">Retour</motion.button>
+                  <motion.button
+                    disabled={mealChoice === 'none'}
+                    onClick={() => setStep(4)}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={ELASTIC_SPRING}
+                    className="flex-[2] py-5 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-50 font-serif text-xl rounded-2xl transition-all"
+                  >
+                    Suivant
+                  </motion.button>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Step 4: Comment and Submit */}
+            {step === 4 && (
+              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={ELASTIC_SPRING}>
+                <h3 className="text-3xl font-serif font-bold text-rose-50 mb-8 tracking-tight">Autre chose à ajouter ?</h3>
+                <textarea
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  placeholder="Votre message..."
+                  rows={4}
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-rose-50 placeholder:text-rose-200/20 focus:outline-none focus:border-rose-500/50 transition-all text-lg mb-4 resize-none"
+                />
+                
+                <motion.button 
+                  disabled={isSubmitting}
+                  onClick={() => { setComment(''); handleSubmit(); }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={ELASTIC_SPRING}
+                  className="w-full mb-8 text-rose-200/40 hover:text-rose-200 text-sm italic transition-colors block text-center underline underline-offset-4 decoration-rose-500/30"
+                >
+                  Je n'ai rien de particulier à ajouter
+                </motion.button>
+
+                <div className="flex gap-4">
+                  <motion.button onClick={() => setStep(isYoungGuest(guestName) ? 2 : 3)} whileHover={{ x: -5 }} transition={ELASTIC_SPRING} className="flex-1 py-4 text-rose-200/40 text-sm font-bold uppercase tracking-widest hover:text-rose-200 transition-colors">Retour</motion.button>
+                  <motion.button
+                    disabled={isSubmitting}
+                    onClick={handleSubmit}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={ELASTIC_SPRING}
+                    className="flex-[2] py-5 bg-rose-500 text-white hover:bg-rose-600 font-serif text-xl rounded-2xl transition-all flex items-center justify-center gap-3 shadow-xl shadow-rose-500/20"
+                  >
+                    {isSubmitting ? (
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      "Envoyer ma réponse"
+                    )}
+                  </motion.button>
+                </div>
+              </motion.div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+};
+
+const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ onClose }) => {
+  return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -380,301 +682,7 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ onClose
         transition={ELASTIC_SPRING}
         className="bg-[#1a0f0a] border border-white/10 rounded-[3rem] w-full max-w-lg p-8 sm:p-12 relative shadow-2xl overflow-hidden"
       >
-        {/* Close Button */}
-        <motion.button 
-          onClick={onClose} 
-          whileHover={{ scale: 1.2, rotate: 90 }}
-          whileTap={{ scale: 0.8 }}
-          transition={ELASTIC_SPRING}
-          className="absolute top-8 right-8 text-rose-200/40 hover:text-rose-200 transition-colors z-50"
-        >
-          <X className="w-6 h-6" />
-        </motion.button>
-
-        <AnimatePresence mode="wait">
-          {isSuccess ? (
-            <motion.div
-              key="success"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={ELASTIC_SPRING}
-              className="py-12 text-center"
-            >
-              <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-emerald-500/30">
-                <Check className="w-10 h-10 text-emerald-400" />
-              </div>
-              <h3 className="text-3xl font-serif font-bold text-rose-50 mb-2">Merci !</h3>
-              <p className="text-rose-200/60 italic text-lg">Votre réponse a bien été enregistrée.</p>
-            </motion.div>
-          ) : (
-            <motion.div key="form" exit={{ opacity: 0, x: -20 }}>
-              {/* Step 1: Who are you? */}
-              {step === 1 && !showUpdatePrompt && (
-                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={ELASTIC_SPRING}>
-                  <h3 className="text-3xl font-serif font-bold text-rose-50 mb-8 tracking-tight">Qui êtes-vous ?</h3>
-                  <div className="space-y-4 mb-8">
-                    <select
-                      value={guestName}
-                      onChange={(e) => setGuestName(e.target.value)}
-                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-rose-50 focus:outline-none focus:border-rose-500/50 transition-all text-lg appearance-none cursor-pointer"
-                    >
-                      <option value="" disabled className="bg-[#1a0f0a]">Sélectionnez votre nom...</option>
-                      {commonGuests.sort().map((name) => (
-                        <option key={name} value={name} className="bg-[#1a0f0a]">{name}</option>
-                      ))}
-                    </select>
-                    <p className="text-rose-200/30 text-xs px-2 italic">Veuillez choisir votre nom dans la liste officielle.</p>
-                  </div>
-                  <motion.button
-                    disabled={!guestName || isSubmitting}
-                    onClick={() => checkExistingResponse(guestName)}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    transition={ELASTIC_SPRING}
-                    className="w-full py-5 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-50 font-serif text-xl rounded-2xl transition-all flex items-center justify-center gap-3 disabled:opacity-30 disabled:cursor-not-allowed shadow-xl group"
-                  >
-                    {isSubmitting ? (
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    ) : (
-                        <>
-                            Suivant
-                            <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                        </>
-                    )}
-                  </motion.button>
-                </motion.div>
-              )}
-
-              {/* Update Prompt */}
-              {step === 1 && showUpdatePrompt && (
-                <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={ELASTIC_SPRING}>
-                  <div className="w-16 h-16 bg-rose-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-rose-500/20">
-                    <Info className="w-8 h-8 text-rose-300" />
-                  </div>
-                  <h3 className="text-2xl font-serif font-bold text-rose-50 mb-4 text-center">Vous avez déjà répondu</h3>
-                  <p className="text-rose-200/60 text-center italic mb-8">Voulez-vous modifier votre réponse existante ?</p>
-                  
-                  <div className="space-y-4">
-                    <motion.button
-                      onClick={() => { setShowUpdatePrompt(false); setStep(2); }}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      transition={ELASTIC_SPRING}
-                      className="w-full py-5 bg-rose-500 text-white font-serif text-xl rounded-2xl transition-all shadow-xl shadow-rose-500/20"
-                    >
-                      Modifier ma réponse
-                    </motion.button>
-                    <motion.button
-                      onClick={() => {
-                        onClose();
-                        setTimeout(() => {
-                           setGuestName('');
-                           setExistingResponseId(null);
-                           setShowUpdatePrompt(false);
-                        }, 500);
-                      }}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      transition={ELASTIC_SPRING}
-                      className="w-full py-4 text-rose-200/40 text-sm font-bold uppercase tracking-widest hover:text-rose-200 transition-colors"
-                    >
-                      Annuler
-                    </motion.button>
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Step 2: Starter Choice */}
-              {step === 2 && (
-                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={ELASTIC_SPRING}>
-                  {isYoungGuest(guestName) ? (
-                    <>
-                      <h3 className="text-3xl font-serif font-bold text-rose-50 mb-6 tracking-tight text-center">Menu spécial</h3>
-                      <div className="bg-rose-500/10 border border-rose-500/20 rounded-3xl p-8 mb-10">
-                        <p className="text-rose-100 text-xl text-center font-serif leading-relaxed italic">
-                          "Les 3 plus jeunes choisiront directement leur menu sur place !"
-                        </p>
-                      </div>
-                      <div className="flex gap-4">
-                        <motion.button 
-                          onClick={() => setStep(1)} 
-                          whileHover={{ x: -5 }} 
-                          transition={ELASTIC_SPRING} 
-                          className="flex-1 py-4 text-rose-200/40 text-sm font-bold uppercase tracking-widest hover:text-rose-200 transition-colors"
-                        >
-                          Retour
-                        </motion.button>
-                        <motion.button
-                          onClick={() => {
-                            onClose();
-                            // Reset state after closing a bit later to avoid flash
-                            setTimeout(() => {
-                              setStep(1);
-                              setGuestName('');
-                              setStarterChoice('none');
-                              setMealChoice('none');
-                              setComment('');
-                              setExistingResponseId(null);
-                              setShowUpdatePrompt(false);
-                            }, 500);
-                          }}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          transition={ELASTIC_SPRING}
-                          className="flex-[2] py-5 bg-rose-500 text-white font-serif text-xl rounded-2xl transition-all shadow-xl shadow-rose-500/20 flex items-center justify-center gap-2"
-                        >
-                          OK
-                        </motion.button>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <h3 className="text-3xl font-serif font-bold text-rose-50 mb-2 tracking-tight">Quelle entrée souhaitez-vous ?</h3>
-                      <p className="text-rose-200/40 italic mb-8">Sélectionnez votre entrée à choix.</p>
-                      <div className="space-y-4 mb-8">
-                        <motion.button
-                          onClick={() => setStarterChoice('jambon')}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          transition={ELASTIC_SPRING}
-                          className={`w-full p-6 rounded-2xl border transition-all flex items-center justify-between ${starterChoice === 'jambon' ? 'bg-rose-500/20 border-rose-500/50 text-rose-50' : 'bg-white/5 border-white/10 text-rose-200/60'}`}
-                        >
-                          <span className="text-left font-medium text-lg">Jambon de Parme</span>
-                          {starterChoice === 'jambon' && <Check className="w-6 h-6 text-rose-300" />}
-                        </motion.button>
-                        <motion.button
-                          onClick={() => setStarterChoice('tomate')}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          transition={ELASTIC_SPRING}
-                          className={`w-full p-6 rounded-2xl border transition-all flex items-center justify-between ${starterChoice === 'tomate' ? 'bg-rose-500/20 border-rose-500/50 text-rose-50' : 'bg-white/5 border-white/10 text-rose-200/60'}`}
-                        >
-                          <span className="text-left font-medium text-lg">Tomate Mozzarella</span>
-                          {starterChoice === 'tomate' && <Check className="w-6 h-6 text-rose-300" />}
-                        </motion.button>
-                        <motion.button
-                          onClick={() => setStarterChoice('crevette')}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          transition={ELASTIC_SPRING}
-                          className={`w-full p-6 rounded-2xl border transition-all flex items-center justify-between ${starterChoice === 'crevette' ? 'bg-rose-500/20 border-rose-500/50 text-rose-50' : 'bg-white/5 border-white/10 text-rose-200/60'}`}
-                        >
-                          <span className="text-left font-medium text-lg">Cocktail de crevettes</span>
-                          {starterChoice === 'crevette' && <Check className="w-6 h-6 text-rose-300" />}
-                        </motion.button>
-                      </div>
-                      <div className="flex gap-4">
-                        <motion.button onClick={() => setStep(1)} whileHover={{ x: -5 }} transition={ELASTIC_SPRING} className="flex-1 py-4 text-rose-200/40 text-sm font-bold uppercase tracking-widest hover:text-rose-200 transition-colors">Retour</motion.button>
-                        <motion.button
-                          disabled={starterChoice === 'none'}
-                          onClick={() => setStep(3)}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          transition={ELASTIC_SPRING}
-                          className="flex-[2] py-5 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-50 font-serif text-xl rounded-2xl transition-all"
-                        >
-                          Suivant
-                        </motion.button>
-                      </div>
-                    </>
-                  )}
-                </motion.div>
-              )}
-
-              {/* Step 3: Meal choice */}
-              {step === 3 && (
-                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={ELASTIC_SPRING}>
-                  <h3 className="text-3xl font-serif font-bold text-rose-50 mb-2 tracking-tight">Quel plat préférez-vous ?</h3>
-                  <p className="text-rose-200/40 italic mb-8">Sélectionnez un plat à choix.</p>
-                  <div className="space-y-4 mb-8">
-                    <motion.button
-                      onClick={() => setMealChoice('perche')}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      transition={ELASTIC_SPRING}
-                      className={`w-full p-6 rounded-2xl border transition-all flex items-center justify-between ${mealChoice === 'perche' ? 'bg-rose-500/20 border-rose-500/50 text-rose-50' : 'bg-white/5 border-white/10 text-rose-200/60'}`}
-                    >
-                      <span className="text-left">
-                        <span className="block font-medium text-lg">Filets de perche</span>
-                        <span className="text-xs opacity-40">Frites</span>
-                      </span>
-                      {mealChoice === 'perche' && <Check className="w-6 h-6 text-rose-300" />}
-                    </motion.button>
-                    <motion.button
-                      onClick={() => setMealChoice('boeuf')}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      transition={ELASTIC_SPRING}
-                      className={`w-full p-6 rounded-2xl border transition-all flex items-center justify-between ${mealChoice === 'boeuf' ? 'bg-rose-500/20 border-rose-500/50 text-rose-50' : 'bg-white/5 border-white/10 text-rose-200/60'}`}
-                    >
-                      <span className="text-left">
-                        <span className="block font-medium text-lg">Médaillons de bœuf</span>
-                        <span className="text-xs opacity-40">Sauce morilles, frites, légumes</span>
-                      </span>
-                      {mealChoice === 'boeuf' && <Check className="w-6 h-6 text-rose-300" />}
-                    </motion.button>
-                  </div>
-                  <div className="flex gap-4">
-                    <motion.button onClick={() => setStep(2)} whileHover={{ x: -5 }} transition={ELASTIC_SPRING} className="flex-1 py-4 text-rose-200/40 text-sm font-bold uppercase tracking-widest hover:text-rose-200 transition-colors">Retour</motion.button>
-                    <motion.button
-                      disabled={mealChoice === 'none'}
-                      onClick={() => setStep(4)}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      transition={ELASTIC_SPRING}
-                      className="flex-[2] py-5 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-50 font-serif text-xl rounded-2xl transition-all"
-                    >
-                      Suivant
-                    </motion.button>
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Step 4: Comment and Submit */}
-              {step === 4 && (
-                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={ELASTIC_SPRING}>
-                  <h3 className="text-3xl font-serif font-bold text-rose-50 mb-8 tracking-tight">Autre chose à ajouter ?</h3>
-                  <textarea
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                    placeholder="Votre message..."
-                    rows={4}
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-rose-50 placeholder:text-rose-200/20 focus:outline-none focus:border-rose-500/50 transition-all text-lg mb-4 resize-none"
-                  />
-                  
-                  <motion.button 
-                    disabled={isSubmitting}
-                    onClick={() => { setComment(''); handleSubmit(); }}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    transition={ELASTIC_SPRING}
-                    className="w-full mb-8 text-rose-200/40 hover:text-rose-200 text-sm italic transition-colors block text-center underline underline-offset-4 decoration-rose-500/30"
-                  >
-                    Je n'ai rien de particulier à ajouter
-                  </motion.button>
-
-                  <div className="flex gap-4">
-                    <motion.button onClick={() => setStep(isYoungGuest(guestName) ? 2 : 3)} whileHover={{ x: -5 }} transition={ELASTIC_SPRING} className="flex-1 py-4 text-rose-200/40 text-sm font-bold uppercase tracking-widest hover:text-rose-200 transition-colors">Retour</motion.button>
-                    <motion.button
-                      disabled={isSubmitting}
-                      onClick={handleSubmit}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      transition={ELASTIC_SPRING}
-                      className="flex-[2] py-5 bg-rose-500 text-white hover:bg-rose-600 font-serif text-xl rounded-2xl transition-all flex items-center justify-center gap-3 shadow-xl shadow-rose-500/20"
-                    >
-                      {isSubmitting ? (
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      ) : (
-                        "Envoyer ma réponse"
-                      )}
-                    </motion.button>
-                  </div>
-                </motion.div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <RSVPModalContent onClose={onClose} />
       </motion.div>
     </motion.div>
   );
@@ -1073,29 +1081,22 @@ const AppContent: React.FC = () => {
           </TiltableBubble>
 
           {/* RSVP Section */}
-          <div className="w-full pt-8 pb-24 text-center min-h-[120px] flex items-center justify-center">
-            <AnimatePresence initial={false}>
-              {!showRSVPModal && (
+          <div className="w-full pt-8 pb-24 text-center">
+            <AnimatePresence>
+              {!showRSVPModal ? (
                 <motion.button
                   key="rsvp-button"
                   layoutId="rsvp-container"
                   onClick={() => setShowRSVPModal(true)}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={ELASTIC_SPRING}
                   whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(244,63,94,0.3)" }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-12 py-5 bg-rose-500/20 border border-rose-500/40 text-rose-50 font-serif text-xl rounded-[2rem] transition-all flex items-center justify-center gap-4 mx-auto shadow-xl relative z-10"
+                  transition={ELASTIC_SPRING}
+                  className="px-12 py-5 bg-rose-500/20 border border-rose-500/40 text-rose-50 font-serif text-xl rounded-[2rem] flex items-center justify-center gap-4 mx-auto shadow-xl"
                 >
                   <CheckCircle2 className="w-6 h-6 text-rose-200" />
                   Répondre à l'invitation
                 </motion.button>
-              )}
-            </AnimatePresence>
-
-            <AnimatePresence>
-              {showRSVPModal && (
+              ) : (
                 <RSVPModal key="rsvp-modal" isOpen={showRSVPModal} onClose={() => setShowRSVPModal(false)} />
               )}
             </AnimatePresence>
