@@ -917,9 +917,6 @@ const AppContent: React.FC = () => {
               <CheckCircle2 className="w-6 h-6 text-rose-200" />
               Répondre à l'invitation
             </motion.button>
-            <p className="text-rose-200/40 text-xs mt-6 uppercase tracking-[0.2em] font-medium">
-              Veuillez répondre avant le 20 Avril
-            </p>
           </motion.div>
           
           <RSVPModal isOpen={showRSVPModal} onClose={() => setShowRSVPModal(false)} />
