@@ -537,7 +537,7 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ onClose
               {step === 3 && (
                 <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={ELASTIC_SPRING}>
                   <h3 className="text-3xl font-serif font-bold text-rose-50 mb-2 tracking-tight">Quel plat préférez-vous ?</h3>
-                  <p className="text-rose-200/40 italic mb-8">Pour la gestion du traiteur.</p>
+                  <p className="text-rose-200/40 italic mb-8">Sélectionnez un plat à choix.</p>
                   <div className="space-y-4 mb-8">
                     <motion.button
                       onClick={() => setMealChoice('perche')}
