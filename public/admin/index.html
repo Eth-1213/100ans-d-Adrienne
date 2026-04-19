@@ -12,17 +12,23 @@
         .pin-btn {
             width: 100%;
             aspect-ratio: 1 / 1;
-            border-radius: 1rem;
+            border-radius: 0.75rem;
             background-color: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.25rem;
+            font-size: 1.125rem;
             font-weight: 500;
             color: #fff1f2;
             transition: all 0.2s;
             cursor: pointer;
+        }
+        @media (min-width: 640px) {
+            .pin-btn {
+                border-radius: 1rem;
+                font-size: 1.5rem;
+            }
         }
         .pin-btn:hover { background-color: rgba(255, 255, 255, 0.1); }
         .pin-btn:active { transform: scale(0.95); }
@@ -69,35 +75,34 @@
         </button>
     </div>
 
-    <!-- Auth Form (Hidden initially) -->
-    <div id="authContainer" class="hidden relative bg-white/5 backdrop-blur-2xl p-10 rounded-[2.5rem] border border-white/10 shadow-2xl w-full max-w-md text-center">
-        <div class="mb-10">
-            <div class="inline-flex p-4 rounded-2xl bg-rose-500/10 text-rose-200 border border-rose-500/20 mb-6">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <div id="authContainer" class="hidden relative bg-white/5 backdrop-blur-2xl p-6 sm:p-10 rounded-[2rem] sm:rounded-[2.5rem] border border-white/10 shadow-2xl w-full max-w-sm sm:max-w-md text-center">
+        <div class="mb-6 sm:mb-10">
+            <div class="inline-flex p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-rose-500/10 text-rose-200 border border-rose-500/20 mb-4 sm:mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 sm:w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
             </div>
-            <h1 class="text-3xl font-serif font-bold text-rose-50 mb-3 tracking-tight">Espace Confidentiel</h1>
-            <p class="text-rose-200/60 font-medium italic">Administration - Adrienne 100 ans</p>
+            <h1 class="text-2xl sm:text-3xl font-serif font-bold text-rose-50 mb-2 sm:mb-3 tracking-tight">Espace Confidentiel</h1>
+            <p class="text-xs sm:text-sm text-rose-200/60 font-medium italic">Administration - Adrienne 100 ans</p>
         </div>
 
-        <form id="loginForm" class="space-y-8">
+        <form id="loginForm" class="space-y-6 sm:space-y-8">
             <div class="text-left">
-                <label for="password" class="block text-xs font-semibold uppercase tracking-[0.2em] text-rose-200/50 mb-3 ml-1">Clé d'accès</label>
+                <label for="password" class="block text-[10px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-rose-200/50 mb-2 sm:mb-3 ml-1">Clé d'accès</label>
                 <div class="relative">
                     <input 
                         type="password" 
                         id="password" 
                         readonly
                         required 
-                        class="w-full px-6 py-4 rounded-2xl bg-white/5 border border-white/10 text-rose-50 text-center tracking-[1em] focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-rose-200/20 transition-all text-2xl placeholder-rose-200/20"
+                        class="w-full px-4 sm:px-6 py-3 sm:py-4 rounded-xl sm:rounded-2xl bg-white/5 border border-white/10 text-rose-50 text-center tracking-[0.8em] sm:tracking-[1em] focus:bg-white/10 focus:outline-none transition-all text-xl sm:text-2xl placeholder-rose-200/20"
                         placeholder="••••"
                     >
                 </div>
             </div>
 
             <!-- Custom Numeric Keypad -->
-            <div id="keypad" class="grid grid-cols-3 gap-4 max-w-[280px] mx-auto">
+            <div id="keypad" class="grid grid-cols-3 gap-3 sm:gap-4 max-w-[240px] sm:max-w-[280px] mx-auto">
                 <button type="button" onclick="appendPin('1')" class="pin-btn">1</button>
                 <button type="button" onclick="appendPin('2')" class="pin-btn">2</button>
                 <button type="button" onclick="appendPin('3')" class="pin-btn">3</button>
@@ -107,16 +112,16 @@
                 <button type="button" onclick="appendPin('7')" class="pin-btn">7</button>
                 <button type="button" onclick="appendPin('8')" class="pin-btn">8</button>
                 <button type="button" onclick="appendPin('9')" class="pin-btn">9</button>
-                <button type="button" onclick="clearPin()" class="w-full aspect-square rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[10px] font-bold uppercase tracking-widest text-rose-400/60 hover:bg-rose-400/10 active:scale-95 transition-all">Effacer</button>
+                <button type="button" onclick="clearPin()" class="w-full aspect-square rounded-xl sm:rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[8px] sm:text-[10px] font-bold uppercase tracking-widest text-rose-400/60 hover:bg-rose-400/10 active:scale-95 transition-all">Effacer</button>
                 <button type="button" onclick="appendPin('0')" class="pin-btn">0</button>
-                <button type="button" onclick="backspacePin()" class="w-full aspect-square rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-rose-400/60 hover:bg-rose-400/10 active:scale-95 transition-all">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg>
+                <button type="button" onclick="backspacePin()" class="w-full aspect-square rounded-xl sm:rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-rose-400/60 hover:bg-rose-400/10 active:scale-95 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 sm:w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg>
                 </button>
             </div>
 
             <button 
                 type="submit" 
-                class="w-full bg-rose-500/20 hover:bg-rose-500/40 text-rose-100 border border-rose-500/40 py-5 rounded-2xl font-bold uppercase tracking-[0.2em] text-xs transition-all active:scale-[0.98] shadow-xl"
+                class="w-full bg-rose-500/20 hover:bg-rose-500/40 text-rose-100 border border-rose-500/40 py-4 sm:py-5 rounded-xl sm:rounded-2xl font-bold uppercase tracking-[0.2em] text-[10px] sm:text-xs transition-all active:scale-[0.98] shadow-xl"
             >
                 Déverrouiller
             </button>
