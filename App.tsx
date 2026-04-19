@@ -1073,30 +1073,29 @@ const AppContent: React.FC = () => {
           </TiltableBubble>
 
           {/* RSVP Section */}
-          <div className="w-full pt-8 pb-24 text-center relative">
-            <AnimatePresence initial={false} mode="popLayout">
-              {!showRSVPModal ? (
-                <motion.div 
-                  key="rsvp-button-container"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
+          <div className="w-full pt-8 pb-24 text-center min-h-[120px] flex items-center justify-center">
+            <AnimatePresence initial={false}>
+              {!showRSVPModal && (
+                <motion.button
+                  key="rsvp-button"
+                  layoutId="rsvp-container"
+                  onClick={() => setShowRSVPModal(true)}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
                   transition={ELASTIC_SPRING}
-                  className="w-full"
+                  whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(244,63,94,0.3)" }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-12 py-5 bg-rose-500/20 border border-rose-500/40 text-rose-50 font-serif text-xl rounded-[2rem] transition-all flex items-center justify-center gap-4 mx-auto shadow-xl relative z-10"
                 >
-                  <motion.button
-                    layoutId="rsvp-container"
-                    onClick={() => setShowRSVPModal(true)}
-                    whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(244,63,94,0.3)" }}
-                    whileTap={{ scale: 0.95 }}
-                    transition={ELASTIC_SPRING}
-                    className="px-12 py-5 bg-rose-500/20 border border-rose-500/40 text-rose-50 font-serif text-xl rounded-[2rem] transition-all flex items-center justify-center gap-4 mx-auto shadow-xl"
-                  >
-                    <CheckCircle2 className="w-6 h-6 text-rose-200" />
-                    Répondre à l'invitation
-                  </motion.button>
-                </motion.div>
-              ) : (
+                  <CheckCircle2 className="w-6 h-6 text-rose-200" />
+                  Répondre à l'invitation
+                </motion.button>
+              )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+              {showRSVPModal && (
                 <RSVPModal key="rsvp-modal" isOpen={showRSVPModal} onClose={() => setShowRSVPModal(false)} />
               )}
             </AnimatePresence>
