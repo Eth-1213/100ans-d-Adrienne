@@ -280,10 +280,13 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  // Placeholder guest list - user will provide final list later
+  // Guest list from the provided document
   const commonGuests = [
-    "Famille Martin", "Jean-Pierre & Marie", "Lucie Bernard", 
-    "Famille Adrienne", "Marc & Sophie", "Pauline"
+    "Mica", "Katrin", "Roland", "Monique", "Felix", "Eveline",
+    "Sébastien", "Elora", "Mayrine", "Sarah", "Nelson", "Liam",
+    "Axelle", "Sacha", "Ethan", "Adrien", "Manu", "Rachelle",
+    "Isabelle", "Gérard", "Antoinette", "Azim", "Adrienne", "Sandra",
+    "Victor"
   ];
 
   const handleSubmit = async () => {

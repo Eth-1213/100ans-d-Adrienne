@@ -5,37 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Administration - Tableau de bord</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <script>
+        // Security check before anything else
         if (!document.cookie.split(';').some((item) => item.trim().startsWith('admin_token='))) {
             window.location.href = '/admin/index.html';
         }
     </script>
     <style>
         body { font-family: 'Inter', sans-serif; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .invisible { visibility: hidden; }
     </style>
 </head>
-<body class="bg-[#0a0502] min-h-screen relative overflow-x-hidden">
+<body class="bg-[#0a0502] min-h-screen relative overflow-x-hidden invisible">
+    <script>
+        (async () => {
+            try {
+                const res = await fetch('/api/check-auth');
+                if (!res.ok) {
+                    window.location.href = '/admin/index.html';
+                } else {
+                    document.body.classList.remove('invisible');
+                }
+            } catch (err) {
+                console.error('Auth check failed:', err);
+                window.location.href = '/admin/index.html';
+            }
+        })();
+    </script>
+
     <!-- Atmospheric background -->
     <div class="fixed inset-0 pointer-events-none">
         <div class="absolute top-[-20%] right-[-10%] w-[60%] h-[60%] bg-rose-500/5 blur-[150px] rounded-full"></div>
         <div class="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-rose-500/5 blur-[120px] rounded-full"></div>
     </div>
 
-    <!-- Shield Script: Redirects immediately if not authorized -->
-    <script>
-        (async () => {
-            try {
-                const res = await fetch('/api/check-auth');
-                if (!res.ok) window.location.href = '/admin/index.html';
-                document.body.classList.remove('invisible');
-            } catch {
-                window.location.href = '/admin/index.html';
-            }
-        })();
-    </script>
-    <script>document.body.className += ' invisible';</script>
-
+    <!-- Navigation -->
     <nav class="bg-white/5 backdrop-blur-xl border-b border-white/10 px-8 py-5 flex justify-between items-center sticky top-0 z-50">
         <div class="flex items-center space-x-4">
             <div class="w-10 h-10 rounded-xl bg-rose-500/20 flex items-center justify-center border border-rose-500/30">
@@ -65,29 +71,24 @@
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-12">
-            <!-- Stat Card 1 -->
             <div class="bg-white/5 backdrop-blur-md p-8 rounded-[2rem] border border-white/10 shadow-xl">
                 <p class="text-xs font-semibold uppercase tracking-[0.3em] text-rose-200/40 mb-3">Vues totales</p>
                 <p id="totalViews" class="text-4xl font-light text-rose-50">0</p>
             </div>
-            <!-- Stat Card 2 -->
             <div class="bg-white/5 backdrop-blur-md p-8 rounded-[2rem] border border-white/10 shadow-xl">
                 <p class="text-xs font-semibold uppercase tracking-[0.3em] text-rose-200/40 mb-3">Confirmés</p>
                 <p id="totalConfirmed" class="text-4xl font-light text-rose-50">0</p>
             </div>
-            <!-- Stat Card 3 -->
             <div class="bg-white/5 backdrop-blur-md p-8 rounded-[2rem] border border-white/10 shadow-xl">
                 <p class="text-xs font-semibold uppercase tracking-[0.3em] text-rose-200/40 mb-3">Absents</p>
                 <p id="totalPending" class="text-4xl font-light text-rose-50/40">0</p>
             </div>
-            <!-- Stat Card 4 -->
             <div class="bg-rose-500/10 backdrop-blur-md p-8 rounded-[2rem] border border-rose-500/20 shadow-xl">
                 <p class="text-xs font-semibold uppercase tracking-[0.3em] text-rose-100/40 mb-3">Budget J-14</p>
                 <p class="text-4xl font-light text-rose-50">94%</p>
             </div>
         </div>
 
-        <!-- RSVP Table -->
         <div class="bg-white/5 backdrop-blur-md rounded-[3rem] border border-white/10 shadow-2xl overflow-hidden mb-12">
             <div class="p-10 border-b border-white/10 flex justify-between items-center">
                 <h3 class="text-2xl font-serif font-bold text-rose-50 tracking-tight">Liste des RSVPs</h3>
@@ -106,19 +107,22 @@
                     </thead>
                     <tbody id="rsvpTableBody" class="text-rose-100/80">
                         <tr>
-                            <td colspan="5" class="py-20 text-center text-rose-200/20 italic">Chargement des données...</td>
+                            <td colspan="5" class="py-20 text-center text-rose-200/20 italic">Récupération des données...</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
             <div class="p-8 bg-white/5 text-center">
-                <p class="text-rose-200/30 text-xs italic">Ceci est une démonstration. Voulez-vous activer la base de données réelle ?</p>
+                <p class="text-rose-200/30 text-xs italic">Système sécurisé v2.0</p>
             </div>
-        </    <script type="module">
+        </div>
+    </main>
+
+    <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Firebase config
+        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyA_BWg2h8M9CElxZpZhwxrtcl0K3mbYgA",
             authDomain: "gen-lang-client-0286287138.firebaseapp.com",
@@ -132,48 +136,46 @@
         const db = getFirestore(app, "ai-studio-c0929086-81ca-4120-b805-bde2cf4b68c0");
 
         const rsvpTableBody = document.getElementById('rsvpTableBody');
-        const totalViewsEl = document.getElementById('totalViews');
         const totalConfirmedEl = document.getElementById('totalConfirmed');
         const totalPendingEl = document.getElementById('totalPending');
 
-        // Initialize directly after password check passes
-        initDashboard();
+        // Dynamic data rendering
+        const q = query(collection(db, "rsvps"), orderBy("createdAt", "desc"));
+        onSnapshot(q, (snapshot) => {
+            let confirmedCount = 0;
+            let absentCount = 0;
+            let rowsHtml = '';
 
-        function initDashboard() {
-            const q = query(collection(db, "rsvps"), orderBy("createdAt", "desc"));
-            onSnapshot(q, (snapshot) => {
-                let confirmed = 0;
-                let absent = 0;
-                let html = '';
+            snapshot.forEach((doc) => {
+                const rsvp = doc.data();
+                if (rsvp.status === 'present') confirmedCount++;
+                else absentCount++;
 
-                snapshot.forEach((doc) => {
-                    const data = doc.data();
-                    if (data.status === 'present') confirmed++;
-                    else absent++;
+                const formattedDate = rsvp.createdAt?.toDate 
+                    ? rsvp.createdAt.toDate().toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) 
+                    : 'En attente...';
 
-                    const date = data.createdAt?.toDate ? data.createdAt.toDate().toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '...';
-
-                    html += `
-                        <tr class="border-b border-white/5 hover:bg-white/5 transition-colors group">
-                            <td class="px-10 py-6 font-serif text-lg text-rose-50">${data.guestName}</td>
-                            <td class="px-6 py-6">
-                                <span class="px-3 py-1 ${data.status === 'present' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'} border rounded-full text-[10px] font-bold uppercase tracking-widest">
-                                    ${data.status === 'present' ? 'Présent' : 'Absent'}
-                                </span>
-                            </td>
-                            <td class="px-6 py-6 text-sm">${data.mealChoice === 'perche' ? 'Perche' : data.mealChoice === 'boeuf' ? 'Bœuf' : '—'}</td>
-                            <td class="px-6 py-6 text-sm italic opacity-60">${data.comment || '—'}</td>
-                            <td class="px-10 py-6 text-right text-[10px] opacity-40">${date}</td>
-                        </tr>
-                    `;
-                });
-
-                rsvpTableBody.innerHTML = html || '<tr><td colspan="5" class="py-20 text-center text-rose-200/20 italic">Aucune réponse pour le moment</td></tr>';
-                totalConfirmedEl.textContent = confirmed;
-                totalPendingEl.textContent = absent;
+                rowsHtml += `
+                    <tr class="border-b border-white/5 hover:bg-white/5 transition-colors group">
+                        <td class="px-10 py-6 font-serif text-lg text-rose-50">${rsvp.guestName}</td>
+                        <td class="px-6 py-6">
+                            <span class="px-3 py-1 ${rsvp.status === 'present' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'} border rounded-full text-[10px] font-bold uppercase tracking-widest">
+                                ${rsvp.status === 'present' ? 'Présent' : 'Absent'}
+                            </span>
+                        </td>
+                        <td class="px-6 py-6 text-sm">${rsvp.mealChoice === 'perche' ? 'Perche' : rsvp.mealChoice === 'boeuf' ? 'Bœuf' : '—'}</td>
+                        <td class="px-6 py-6 text-sm italic opacity-60">${rsvp.comment || '—'}</td>
+                        <td class="px-10 py-6 text-right text-[10px] opacity-40">${formattedDate}</td>
+                    </tr>
+                `;
             });
-        }
 
+            rsvpTableBody.innerHTML = rowsHtml || '<tr><td colspan="5" class="py-20 text-center text-rose-200/20 italic">Aucune réponse pour le moment</td></tr>';
+            totalConfirmedEl.textContent = confirmedCount;
+            totalPendingEl.textContent = absentCount;
+        });
+
+        // Logout handler
         document.getElementById('logoutBtn').addEventListener('click', async () => {
             await fetch('/api/logout');
             window.location.href = '/admin/index.html';
