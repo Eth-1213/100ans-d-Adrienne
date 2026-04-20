@@ -20,68 +20,6 @@
         button { transition: all 0.6s cubic-bezier(0.68, -0.6, 0.32, 1.6); }
         button:hover { transform: scale(1.05); }
         button:active { transform: scale(0.95); }
-
-        /* Expansion animations */
-        .details-wrapper {
-            display: grid;
-            grid-template-rows: 0fr;
-            transition: all 0.7s cubic-bezier(0.68, -0.6, 0.32, 1.6);
-            opacity: 0;
-            pointer-events: none;
-        }
-        .expanded .details-wrapper {
-            grid-template-rows: 1fr;
-            opacity: 1;
-            pointer-events: auto;
-            margin-top: 1.5rem;
-            margin-bottom: 0.5rem;
-        }
-        .details-content {
-            overflow: hidden;
-        }
-        .expanded .table-cell-hide {
-            opacity: 0;
-            filter: blur(10px);
-            transform: translateY(10px);
-            pointer-events: none;
-            transition: all 0.5s ease;
-        }
-        .rsvp-row {
-            transition: all 0.7s cubic-bezier(0.68, -0.6, 0.32, 1.6);
-            background-color: transparent;
-            position: relative;
-            z-index: 1;
-        }
-        .rsvp-row.expanded {
-            background-color: rgba(255, 255, 255, 0.03) !important;
-            transform: scale(1.01) translateY(-8px);
-            z-index: 50;
-            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6), 0 0 20px rgba(244, 63, 94, 0.05);
-        }
-        .rsvp-row td {
-            transition: all 0.5s ease;
-        }
-        .expanded td {
-            padding-top: 2rem !important;
-            padding-bottom: 2rem !important;
-        }
-        /* Glowing edge for detached rows */
-        .expanded::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border: 1px solid rgba(244, 63, 94, 0.2);
-            border-radius: 2rem;
-            pointer-events: none;
-            animation: pulse-glow 2s infinite ease-in-out;
-        }
-        @keyframes pulse-glow {
-            0%, 100% { border-color: rgba(244, 63, 94, 0.1); box-shadow: inset 0 0 10px rgba(244, 63, 94, 0); }
-            50% { border-color: rgba(244, 63, 94, 0.3); box-shadow: inset 0 0 20px rgba(244, 63, 94, 0.05); }
-        }
-        .table-container {
-            perspective: 2000px;
-        }
     </style>
 </head>
 <body class="bg-[#0a0502] min-h-screen relative overflow-x-hidden invisible">
@@ -161,21 +99,21 @@
             <div class="p-6 sm:p-10 border-b border-white/10 flex flex-col sm:row justify-between items-start sm:items-center gap-4">
                 <h3 class="text-xl sm:text-2xl font-serif font-bold text-rose-50 tracking-tight">Liste des réponses</h3>
             </div>
-            <div class="overflow-x-auto table-container p-4 sm:p-8">
-                <table class="w-full text-left border-separate border-spacing-y-4 min-w-[600px] sm:min-w-0">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[600px] sm:min-w-0">
                     <thead>
-                        <tr class="text-[10px] sm:text-xs uppercase tracking-widest text-rose-200/40">
-                            <th class="px-4 sm:px-10 py-2 font-bold whitespace-nowrap">Invité</th>
-                            <th class="px-4 sm:px-6 py-2 font-bold whitespace-nowrap">Entrée</th>
-                            <th class="px-4 sm:px-6 py-2 font-bold whitespace-nowrap">Plat</th>
-                            <th class="px-4 sm:px-6 py-2 font-bold whitespace-nowrap">Commentaire</th>
-                            <th class="px-4 sm:px-6 py-2 font-bold whitespace-nowrap">Date</th>
-                            <th class="px-4 sm:px-10 py-2 font-bold text-right whitespace-nowrap">Actions</th>
+                        <tr class="text-[10px] sm:text-xs uppercase tracking-widest text-rose-200/40 border-b border-white/5">
+                            <th class="px-4 sm:px-10 py-4 sm:py-6 font-bold">Invité</th>
+                            <th class="px-4 sm:px-6 py-4 sm:py-6 font-bold">Entrée</th>
+                            <th class="px-4 sm:px-6 py-4 sm:py-6 font-bold">Plat</th>
+                            <th class="px-4 sm:px-6 py-4 sm:py-6 font-bold">Commentaire</th>
+                            <th class="px-4 sm:px-6 py-4 sm:py-6 font-bold">Date</th>
+                            <th class="px-4 sm:px-10 py-4 sm:py-6 font-bold text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="rsvpTableBody" class="text-rose-100/80">
                         <tr>
-                            <td colspan="6" class="py-20 text-center text-rose-200/20 italic">Récupération des données...</td>
+                            <td colspan="5" class="py-20 text-center text-rose-200/20 italic">Récupération des données...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -208,21 +146,6 @@
         const countPercheEl = document.getElementById('countPerche');
         const countBoeufEl = document.getElementById('countBoeuf');
 
-        let expandedRowId = null;
-
-        window.toggleRow = (id) => {
-            const currentExpanded = document.querySelector('.rsvp-row.expanded');
-            if (currentExpanded && currentExpanded.id !== `row-${id}`) {
-                currentExpanded.classList.remove('expanded');
-            }
-            
-            const targetRow = document.getElementById(`row-${id}`);
-            if (targetRow) {
-                targetRow.classList.toggle('expanded');
-                expandedRowId = targetRow.classList.contains('expanded') ? id : null;
-            }
-        };
-
         // Dynamic data rendering
         const q = query(collection(db, "rsvps"), orderBy("createdAt", "desc"));
         onSnapshot(q, (snapshot) => {
@@ -240,66 +163,24 @@
                 const starterLabel = {
                     'jambon': 'Jambon Parme',
                     'tomate': 'Tomate Mozza',
-                    'crevette': 'Crevettes',
-                    'on_site_kids': 'Sur place (enfant)'
+                    'crevette': 'Crevettes'
                 }[rsvp.starterChoice] || '—';
-
-                const mealLabel = {
-                    'perche': 'Perche',
-                    'boeuf': 'Bœuf',
-                    'on_site_kids': 'Sur place (enfant)'
-                }[rsvp.mealChoice] || '—';
 
                 const formattedDate = rsvp.createdAt?.toDate 
                     ? rsvp.createdAt.toDate().toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) 
                     : 'En attente...';
 
-                const isExpanded = expandedRowId === doc.id;
-
                 rowsHtml += `
-                    <tr id="row-${doc.id}" onclick="window.toggleRow('${doc.id}')" class="rsvp-row transition-all cursor-pointer group ${isExpanded ? 'expanded' : ''}" style="border: 1px solid transparent;">
-                        <td class="px-4 sm:px-10 py-4 sm:py-6 relative z-20 rounded-l-2xl">
-                            <div class="flex flex-col">
-                                <span class="font-serif text-base sm:text-lg text-rose-50">${rsvp.guestName}</span>
-                                <div class="details-wrapper">
-                                    <div class="details-content">
-                                        <div class="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-6 shadow-2xl">
-                                            <div class="grid grid-cols-2 gap-6">
-                                                <div>
-                                                    <p class="text-[8px] uppercase tracking-[0.2em] text-rose-200/40 font-bold mb-1">Entrée</p>
-                                                    <p class="text-rose-100 text-sm font-medium transition-all ${rsvp.starterChoice === 'on_site_kids' ? 'italic opacity-60' : ''}">${starterLabel}</p>
-                                                </div>
-                                                <div>
-                                                    <p class="text-[8px] uppercase tracking-[0.2em] text-rose-200/40 font-bold mb-1">Plat Principal</p>
-                                                    <p class="text-rose-100 text-sm font-medium transition-all ${rsvp.mealChoice === 'on_site_kids' ? 'italic opacity-60' : ''}">${mealLabel}</p>
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <p class="text-[8px] uppercase tracking-[0.2em] text-rose-200/40 font-bold mb-1">Commentaire</p>
-                                                <p class="text-rose-200/70 text-sm italic whitespace-pre-wrap leading-relaxed">${rsvp.comment || '— Aucun message —'}</p>
-                                            </div>
-                                            <div class="flex items-center justify-between pt-4 border-t border-white/5">
-                                                <div class="flex flex-col">
-                                                    <p class="text-[8px] uppercase tracking-[0.2em] text-rose-200/40 font-bold mb-0.5">Date d'envoi</p>
-                                                    <p class="text-rose-200/30 text-[10px]">${formattedDate}</p>
-                                                </div>
-                                                <button onclick="event.stopPropagation(); window.deleteRSVP('${doc.id}')" class="px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[10px] font-bold uppercase tracking-widest rounded-lg border border-rose-500/20 transition-all">
-                                                    Supprimer
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="px-4 sm:px-6 py-4 sm:py-6 table-cell-hide">
+                    <tr class="border-b border-white/5 hover:bg-white/5 transition-colors group">
+                        <td class="px-4 sm:px-10 py-4 sm:py-6 font-serif text-base sm:text-lg text-rose-50">${rsvp.guestName}</td>
+                        <td class="px-4 sm:px-6 py-4 sm:py-6">
                             <span class="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-rose-200/60">${starterLabel}</span>
                         </td>
-                        <td class="px-4 sm:px-6 py-4 sm:py-6 text-xs sm:text-sm text-rose-100/90 table-cell-hide">${mealLabel}</td>
-                        <td class="px-4 sm:px-6 py-4 sm:py-6 text-xs sm:text-sm italic opacity-60 max-w-[100px] sm:max-w-xs truncate table-cell-hide">${rsvp.comment || '—'}</td>
-                        <td class="px-4 sm:px-6 py-4 sm:py-6 text-[8px] sm:text-[10px] opacity-40 table-cell-hide">${formattedDate}</td>
-                        <td class="px-4 sm:px-10 py-4 sm:py-6 text-right table-cell-hide rounded-r-2xl">
-                            <button onclick="event.stopPropagation(); window.deleteRSVP('${doc.id}')" class="text-rose-400/50 hover:text-rose-400 transition-colors p-1.5 sm:p-2 rounded-lg hover:bg-rose-400/10">
+                        <td class="px-4 sm:px-6 py-4 sm:py-6 text-xs sm:text-sm text-rose-100/90">${rsvp.mealChoice === 'perche' ? 'Perche' : rsvp.mealChoice === 'boeuf' ? 'Bœuf' : '—'}</td>
+                        <td class="px-4 sm:px-6 py-4 sm:py-6 text-xs sm:text-sm italic opacity-60 max-w-[100px] sm:max-w-xs truncate">${rsvp.comment || '—'}</td>
+                        <td class="px-4 sm:px-6 py-4 sm:py-6 text-[8px] sm:text-[10px] opacity-40">${formattedDate}</td>
+                        <td class="px-4 sm:px-10 py-4 sm:py-6 text-right">
+                            <button onclick="window.deleteRSVP('${doc.id}')" class="text-rose-400/50 hover:text-rose-400 transition-colors p-1.5 sm:p-2 rounded-lg hover:bg-rose-400/10">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                             </button>
                         </td>

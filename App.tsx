@@ -266,7 +266,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   }
 }
 
-const ELASTIC_SPRING = { type: "spring", stiffness: 450, damping: 14, mass: 0.8 };
+const ELASTIC_SPRING = { type: "spring", stiffness: 400, damping: 15 };
 
 const App: React.FC = () => {
   return (
@@ -384,10 +384,8 @@ const RSVPModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         {isSuccess ? (
           <motion.div
             key="success"
-            layout
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
             transition={ELASTIC_SPRING}
             className="py-12 text-center"
           >
@@ -398,10 +396,10 @@ const RSVPModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             <p className="text-rose-200/60 italic text-lg">Votre réponse a bien été enregistrée.</p>
           </motion.div>
         ) : (
-          <motion.div key="form" exit={{ opacity: 0, x: -20 }} layout>
+          <motion.div key="form" exit={{ opacity: 0, x: -20 }}>
             {/* Step 1: Who are you? */}
             {step === 1 && !showUpdatePrompt && (
-              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={ELASTIC_SPRING} layout>
+              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={ELASTIC_SPRING}>
                 <h3 className="text-3xl font-serif font-bold text-rose-50 mb-8 tracking-tight">Qui êtes-vous ?</h3>
                 <div className="space-y-4 mb-8">
                   <select
@@ -438,7 +436,7 @@ const RSVPModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
             {/* Update Prompt */}
             {step === 1 && showUpdatePrompt && (
-              <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={ELASTIC_SPRING} layout>
+              <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={ELASTIC_SPRING}>
                 <div className="w-16 h-16 bg-rose-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-rose-500/20">
                   <Info className="w-8 h-8 text-rose-300" />
                 </div>
@@ -477,7 +475,7 @@ const RSVPModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
             {/* Step 2: Starter Choice */}
             {step === 2 && (
-              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={ELASTIC_SPRING} layout>
+              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={ELASTIC_SPRING}>
                 {isYoungGuest(guestName) ? (
                   <>
                     <h3 className="text-3xl font-serif font-bold text-rose-50 mb-6 tracking-tight text-center">Menu spécial</h3>
@@ -574,7 +572,7 @@ const RSVPModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
             {/* Step 3: Meal choice */}
             {step === 3 && (
-              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={ELASTIC_SPRING} layout>
+              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={ELASTIC_SPRING}>
                 <h3 className="text-3xl font-serif font-bold text-rose-50 mb-2 tracking-tight">Quel plat préférez-vous ?</h3>
                 <p className="text-rose-200/40 italic mb-8">Sélectionnez un plat à choix.</p>
                 <div className="space-y-4 mb-8">
@@ -623,7 +621,7 @@ const RSVPModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
             {/* Step 4: Comment and Submit */}
             {step === 4 && (
-              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={ELASTIC_SPRING} layout>
+              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={ELASTIC_SPRING}>
                 <h3 className="text-3xl font-serif font-bold text-rose-50 mb-8 tracking-tight">Autre chose à ajouter ?</h3>
                 <textarea
                   value={comment}
@@ -676,14 +674,11 @@ const RSVPModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ onClose
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={ELASTIC_SPRING}
       className="fixed inset-0 z-[300] bg-black/80 backdrop-blur-xl flex items-center justify-center p-6"
     >
       <motion.div
         layoutId="rsvp-container"
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
         transition={ELASTIC_SPRING}
         className="bg-[#1a0f0a] border border-white/10 rounded-[3rem] w-full max-w-lg p-8 sm:p-12 relative shadow-2xl overflow-hidden"
       >
