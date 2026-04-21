@@ -73,11 +73,21 @@
         </header>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 mb-8 sm:mb-12">
-            <div class="bg-emerald-500/10 backdrop-blur-md p-6 sm:p-8 rounded-2xl sm:rounded-[2rem] border border-emerald-500/20 shadow-xl">
-                <p class="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.2em] sm:tracking-[0.3em] text-emerald-200/40 mb-2 sm:mb-3">Total Confirmés</p>
-                <div class="flex items-baseline gap-2">
-                    <p id="totalConfirmed" class="text-3xl sm:text-4xl font-light text-emerald-50">0</p>
-                    <span class="text-emerald-500/40 text-xs sm:text-sm">invités</span>
+            <div class="bg-white/5 backdrop-blur-md p-6 sm:p-8 rounded-2xl sm:rounded-[2rem] border border-white/10 shadow-xl">
+                <p class="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.2em] sm:tracking-[0.3em] text-rose-200/40 mb-2 sm:mb-3">Statistiques Entrées</p>
+                <div class="flex gap-4 sm:gap-6 group">
+                   <div class="flex flex-col">
+                       <span id="countJambon" class="text-xl sm:text-2xl text-rose-50 font-light">0</span>
+                       <span class="text-[8px] sm:text-[10px] uppercase text-rose-200/30 font-bold">Jambon</span>
+                   </div>
+                   <div class="flex flex-col">
+                       <span id="countTomate" class="text-xl sm:text-2xl text-rose-50 font-light">0</span>
+                       <span class="text-[8px] sm:text-[10px] uppercase text-rose-200/30 font-bold">Tomate</span>
+                   </div>
+                   <div class="flex flex-col">
+                       <span id="countCrevette" class="text-xl sm:text-2xl text-rose-50 font-light">0</span>
+                       <span class="text-[8px] sm:text-[10px] uppercase text-rose-200/30 font-bold">Crevette</span>
+                   </div>
                 </div>
             </div>
             <div class="bg-white/5 backdrop-blur-md p-6 sm:p-8 rounded-2xl sm:rounded-[2rem] border border-white/10 shadow-xl">
@@ -142,21 +152,27 @@
         const db = getFirestore(app, "ai-studio-c0929086-81ca-4120-b805-bde2cf4b68c0");
 
         const rsvpTableBody = document.getElementById('rsvpTableBody');
-        const totalConfirmedEl = document.getElementById('totalConfirmed');
+        const countJambonEl = document.getElementById('countJambon');
+        const countTomateEl = document.getElementById('countTomate');
+        const countCrevetteEl = document.getElementById('countCrevette');
         const countPercheEl = document.getElementById('countPerche');
         const countBoeufEl = document.getElementById('countBoeuf');
 
         // Dynamic data rendering
         const q = query(collection(db, "rsvps"), orderBy("createdAt", "desc"));
         onSnapshot(q, (snapshot) => {
-            let confirmedCount = 0;
+            let jambonCount = 0;
+            let tomateCount = 0;
+            let crevetteCount = 0;
             let percheCount = 0;
             let boeufCount = 0;
             let rowsHtml = '';
 
             snapshot.forEach((doc) => {
                 const rsvp = doc.data();
-                confirmedCount++;
+                if (rsvp.starterChoice === 'jambon') jambonCount++;
+                if (rsvp.starterChoice === 'tomate') tomateCount++;
+                if (rsvp.starterChoice === 'crevette') crevetteCount++;
                 if (rsvp.mealChoice === 'perche') percheCount++;
                 if (rsvp.mealChoice === 'boeuf') boeufCount++;
 
@@ -189,7 +205,9 @@
             });
 
             rsvpTableBody.innerHTML = rowsHtml || '<tr><td colspan="6" class="py-20 text-center text-rose-200/20 italic">Aucune réponse pour le moment</td></tr>';
-            totalConfirmedEl.textContent = confirmedCount;
+            countJambonEl.textContent = jambonCount;
+            countTomateEl.textContent = tomateCount;
+            countCrevetteEl.textContent = crevetteCount;
             countPercheEl.textContent = percheCount;
             countBoeufEl.textContent = boeufCount;
         });
