@@ -27,8 +27,8 @@ service cloud.firestore {
              data.keys().size() == 6 &&
              data.guestName is string && data.guestName.size() >= 2 && data.guestName.size() <= 100 &&
              data.status in ['present', 'absent'] &&
-             data.starterChoice in ['jambon', 'tomate', 'crevette', 'none'] &&
-             data.mealChoice in ['perche', 'boeuf', 'none'] &&
+             data.starterChoice in ['jambon', 'tomate', 'crevette', 'none', 'on_site_kids'] &&
+             data.mealChoice in ['perche', 'boeuf', 'none', 'on_site_kids'] &&
              data.comment is string && data.comment.size() <= 500 &&
              data.createdAt == request.time;
     }

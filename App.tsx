@@ -373,7 +373,7 @@ const RSVPModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const contentExit = { opacity: 0, scale: 0.95 };
   const innerTransition = { ...ELASTIC_SPRING, delay: 0.05 };
 
-  const CloseBtn = () => (
+  const closeBtnElement = (
     <motion.button 
       onClick={onClose} 
       whileHover={{ scale: 1.2, rotate: 90 }}
@@ -389,7 +389,7 @@ const RSVPModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     <AnimatePresence mode="popLayout">
       {isSuccess ? (
         <motion.div key="success" layoutId="rsvp-container" initial={contentInitial} animate={contentAnimate} exit={contentExit} transition={ELASTIC_SPRING} className={modalClasses}>
-          <CloseBtn />
+          {closeBtnElement}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={innerTransition} className="py-12 text-center">
             <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-emerald-500/30">
               <Check className="w-10 h-10 text-emerald-400" />
@@ -400,7 +400,7 @@ const RSVPModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         </motion.div>
       ) : step === 1 && !showUpdatePrompt ? (
         <motion.div key="step-1" layoutId="rsvp-container" initial={contentInitial} animate={contentAnimate} exit={contentExit} transition={ELASTIC_SPRING} className={modalClasses}>
-          <CloseBtn />
+          {closeBtnElement}
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} transition={innerTransition}>
             <h3 className="text-3xl font-serif font-bold text-rose-50 mb-8 tracking-tight">Qui êtes-vous ?</h3>
             <div className="space-y-4 mb-8">
@@ -437,7 +437,7 @@ const RSVPModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         </motion.div>
       ) : step === 1 && showUpdatePrompt ? (
         <motion.div key="step-1-update" layoutId="rsvp-container" initial={contentInitial} animate={contentAnimate} exit={contentExit} transition={ELASTIC_SPRING} className={modalClasses}>
-          <CloseBtn />
+          {closeBtnElement}
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={innerTransition}>
             <div className="w-16 h-16 bg-rose-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-rose-500/20">
               <Info className="w-8 h-8 text-rose-300" />
@@ -475,7 +475,7 @@ const RSVPModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         </motion.div>
       ) : step === 2 && isYoungGuest(guestName) ? (
         <motion.div key="step-2-kids" layoutId="rsvp-container" initial={contentInitial} animate={contentAnimate} exit={contentExit} transition={ELASTIC_SPRING} className={modalClasses}>
-          <CloseBtn />
+          {closeBtnElement}
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={innerTransition}>
             <h3 className="text-3xl font-serif font-bold text-rose-50 mb-6 tracking-tight text-center">Menu spécial</h3>
             <div className="bg-rose-500/10 border border-rose-500/20 rounded-3xl p-8 mb-10">
@@ -504,7 +504,7 @@ const RSVPModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         </motion.div>
       ) : step === 2 && !isYoungGuest(guestName) ? (
         <motion.div key="step-2" layoutId="rsvp-container" initial={contentInitial} animate={contentAnimate} exit={contentExit} transition={ELASTIC_SPRING} className={modalClasses}>
-          <CloseBtn />
+          {closeBtnElement}
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={innerTransition}>
             <h3 className="text-3xl font-serif font-bold text-rose-50 mb-2 tracking-tight">Quelle entrée souhaitez-vous ?</h3>
             <p className="text-rose-200/40 italic mb-8">Sélectionnez votre entrée à choix.</p>
@@ -532,7 +532,7 @@ const RSVPModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         </motion.div>
       ) : step === 3 ? (
         <motion.div key="step-3" layoutId="rsvp-container" initial={contentInitial} animate={contentAnimate} exit={contentExit} transition={ELASTIC_SPRING} className={modalClasses}>
-          <CloseBtn />
+          {closeBtnElement}
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={innerTransition}>
             <h3 className="text-3xl font-serif font-bold text-rose-50 mb-2 tracking-tight">Quel plat préférez-vous ?</h3>
             <p className="text-rose-200/40 italic mb-8">Sélectionnez un plat à choix.</p>
@@ -556,7 +556,7 @@ const RSVPModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         </motion.div>
       ) : step === 4 ? (
         <motion.div key="step-4" layoutId="rsvp-container" initial={contentInitial} animate={contentAnimate} exit={contentExit} transition={ELASTIC_SPRING} className={modalClasses}>
-          <CloseBtn />
+          {closeBtnElement}
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={innerTransition}>
             <h3 className="text-3xl font-serif font-bold text-rose-50 mb-8 tracking-tight">Autre chose à ajouter ?</h3>
             <textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Votre message..." rows={4} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-rose-50 placeholder:text-rose-200/20 focus:outline-none focus:border-rose-500/50 transition-all text-lg mb-4 resize-none" />
