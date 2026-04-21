@@ -279,8 +279,8 @@ const App: React.FC = () => {
 const RSVPModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [step, setStep] = useState(1);
   const [guestName, setGuestName] = useState('');
-  const [starterChoice, setStarterChoice] = useState<'jambon' | 'tomate' | 'crevette' | 'none'>('none');
-  const [mealChoice, setMealChoice] = useState<'perche' | 'boeuf' | 'none'>('none');
+  const [starterChoice, setStarterChoice] = useState<'jambon' | 'tomate' | 'crevette' | 'none' | 'on_site_kids'>('none');
+  const [mealChoice, setMealChoice] = useState<'perche' | 'boeuf' | 'none' | 'on_site_kids'>('none');
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -350,9 +350,14 @@ const RSVPModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           setShowUpdatePrompt(false);
         }, 500);
       }, 2000);
-    } catch (error) {
-      console.error("Error submitting RSVP:", error);
-      alert("Une erreur est survenue lors de l'envoi. Veuillez réessayer.");
+    } catch (err: unknown) {
+      console.error("Error submitting RSVP:", err);
+      // Clean error presentation for stability
+      const error = err as { code?: string };
+      const errorMessage = error?.code === 'permission-denied' 
+        ? "Vous n'avez pas la permission de faire cette modification."
+        : "Une erreur est survenue lors de l'envoi. Veuillez réessayer.";
+      alert(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

@@ -57,6 +57,12 @@ async function startServer() {
     res.status(200).json({ success: true });
   });
 
+  // Global Error Handler
+  app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => { // eslint-disable-line @typescript-eslint/no-unused-vars
+    console.error('Unhandled Server Error:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  });
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({

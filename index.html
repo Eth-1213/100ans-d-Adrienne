@@ -16,7 +16,37 @@
         <p>Veuillez activer JavaScript pour voir cette invitation.</p>
       </div>
     </noscript>
-    <div id="root"></div>
+    <div id="root">
+      <style>
+        .initial-loader {
+          position: fixed;
+          top: 0; left: 0; right: 0; bottom: 0;
+          background: #0a0502;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 9999;
+        }
+        .loader-dot {
+          width: 12px; height: 12px;
+          background: #f43f5e;
+          border-radius: 50%;
+          margin: 0 5px;
+          animation: bounce 0.6s infinite alternate;
+        }
+        .loader-dot:nth-child(2) { animation-delay: 0.2s; }
+        .loader-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce {
+          from { transform: translateY(0); opacity: 0.3; }
+          to { transform: translateY(-10px); opacity: 1; }
+        }
+      </style>
+      <div class="initial-loader">
+        <div class="loader-dot"></div>
+        <div class="loader-dot"></div>
+        <div class="loader-dot"></div>
+      </div>
+    </div>
   <script type="module" src="/index.tsx"></script>
 </body>
 </html>
