@@ -388,7 +388,7 @@ const RSVPModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   return (
     <AnimatePresence mode="popLayout">
       {isSuccess ? (
-        <motion.div key="success" layoutId="step-4-send" initial={contentInitial} animate={contentAnimate} exit={contentExit} transition={ELASTIC_SPRING} className={modalClasses}>
+        <motion.div key="success" layoutId="rsvp-container" initial={contentInitial} animate={contentAnimate} exit={contentExit} transition={ELASTIC_SPRING} className={modalClasses}>
           <CloseBtn />
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={innerTransition} className="py-12 text-center">
             <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-emerald-500/30">
@@ -419,7 +419,6 @@ const RSVPModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             <motion.button
               disabled={!guestName || isSubmitting}
               onClick={() => checkExistingResponse(guestName)}
-              layoutId="step-1-next"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               transition={ELASTIC_SPRING}
@@ -448,7 +447,6 @@ const RSVPModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             <div className="space-y-4">
               <motion.button
                 onClick={() => { setShowUpdatePrompt(false); setStep(2); }}
-                layoutId="step-1-update-btn"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 transition={ELASTIC_SPRING}
@@ -476,7 +474,7 @@ const RSVPModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           </motion.div>
         </motion.div>
       ) : step === 2 && isYoungGuest(guestName) ? (
-        <motion.div key="step-2-kids" layoutId={existingResponseId ? "step-1-update-btn" : "step-1-next"} initial={contentInitial} animate={contentAnimate} exit={contentExit} transition={ELASTIC_SPRING} className={modalClasses}>
+        <motion.div key="step-2-kids" layoutId="rsvp-container" initial={contentInitial} animate={contentAnimate} exit={contentExit} transition={ELASTIC_SPRING} className={modalClasses}>
           <CloseBtn />
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={innerTransition}>
             <h3 className="text-3xl font-serif font-bold text-rose-50 mb-6 tracking-tight text-center">Menu spécial</h3>
@@ -505,7 +503,7 @@ const RSVPModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           </motion.div>
         </motion.div>
       ) : step === 2 && !isYoungGuest(guestName) ? (
-        <motion.div key="step-2" layoutId={existingResponseId ? "step-1-update-btn" : "step-1-next"} initial={contentInitial} animate={contentAnimate} exit={contentExit} transition={ELASTIC_SPRING} className={modalClasses}>
+        <motion.div key="step-2" layoutId="rsvp-container" initial={contentInitial} animate={contentAnimate} exit={contentExit} transition={ELASTIC_SPRING} className={modalClasses}>
           <CloseBtn />
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={innerTransition}>
             <h3 className="text-3xl font-serif font-bold text-rose-50 mb-2 tracking-tight">Quelle entrée souhaitez-vous ?</h3>
@@ -526,14 +524,14 @@ const RSVPModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             </div>
             <div className="flex gap-4">
               <motion.button onClick={() => setStep(1)} whileHover={{ x: -5 }} transition={ELASTIC_SPRING} className="flex-1 py-4 text-rose-200/40 text-sm font-bold uppercase tracking-widest hover:text-rose-200 transition-colors">Retour</motion.button>
-              <motion.button disabled={starterChoice === "none"} onClick={() => setStep(3)} layoutId="step-2-next" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} transition={ELASTIC_SPRING} className="flex-[2] py-5 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-50 font-serif text-xl rounded-2xl transition-all">
+              <motion.button disabled={starterChoice === "none"} onClick={() => setStep(3)} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} transition={ELASTIC_SPRING} className="flex-[2] py-5 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-50 font-serif text-xl rounded-2xl transition-all">
                 Suivant
               </motion.button>
             </div>
           </motion.div>
         </motion.div>
       ) : step === 3 ? (
-        <motion.div key="step-3" layoutId="step-2-next" initial={contentInitial} animate={contentAnimate} exit={contentExit} transition={ELASTIC_SPRING} className={modalClasses}>
+        <motion.div key="step-3" layoutId="rsvp-container" initial={contentInitial} animate={contentAnimate} exit={contentExit} transition={ELASTIC_SPRING} className={modalClasses}>
           <CloseBtn />
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={innerTransition}>
             <h3 className="text-3xl font-serif font-bold text-rose-50 mb-2 tracking-tight">Quel plat préférez-vous ?</h3>
@@ -550,14 +548,14 @@ const RSVPModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             </div>
             <div className="flex gap-4">
               <motion.button onClick={() => setStep(2)} whileHover={{ x: -5 }} transition={ELASTIC_SPRING} className="flex-1 py-4 text-rose-200/40 text-sm font-bold uppercase tracking-widest hover:text-rose-200 transition-colors">Retour</motion.button>
-              <motion.button disabled={mealChoice === "none"} onClick={() => setStep(4)} layoutId="step-3-next" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} transition={ELASTIC_SPRING} className="flex-[2] py-5 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-50 font-serif text-xl rounded-2xl transition-all">
+              <motion.button disabled={mealChoice === "none"} onClick={() => setStep(4)} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} transition={ELASTIC_SPRING} className="flex-[2] py-5 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-50 font-serif text-xl rounded-2xl transition-all">
                 Suivant
               </motion.button>
             </div>
           </motion.div>
         </motion.div>
       ) : step === 4 ? (
-        <motion.div key="step-4" layoutId="step-3-next" initial={contentInitial} animate={contentAnimate} exit={contentExit} transition={ELASTIC_SPRING} className={modalClasses}>
+        <motion.div key="step-4" layoutId="rsvp-container" initial={contentInitial} animate={contentAnimate} exit={contentExit} transition={ELASTIC_SPRING} className={modalClasses}>
           <CloseBtn />
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={innerTransition}>
             <h3 className="text-3xl font-serif font-bold text-rose-50 mb-8 tracking-tight">Autre chose à ajouter ?</h3>
@@ -567,7 +565,7 @@ const RSVPModalContent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             </motion.button>
             <div className="flex gap-4">
               <motion.button onClick={() => setStep(isYoungGuest(guestName) ? 2 : 3)} whileHover={{ x: -5 }} transition={ELASTIC_SPRING} className="flex-1 py-4 text-rose-200/40 text-sm font-bold uppercase tracking-widest hover:text-rose-200 transition-colors">Retour</motion.button>
-              <motion.button disabled={isSubmitting} onClick={handleSubmit} layoutId="step-4-send" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} transition={ELASTIC_SPRING} className="flex-[2] py-5 bg-rose-500 text-white hover:bg-rose-600 font-serif text-xl rounded-2xl transition-all flex items-center justify-center gap-3 shadow-xl shadow-rose-500/20">
+              <motion.button disabled={isSubmitting} onClick={handleSubmit} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} transition={ELASTIC_SPRING} className="flex-[2] py-5 bg-rose-500 text-white hover:bg-rose-600 font-serif text-xl rounded-2xl transition-all flex items-center justify-center gap-3 shadow-xl shadow-rose-500/20">
                 {isSubmitting ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : "Envoyer ma réponse"}
               </motion.button>
             </div>
