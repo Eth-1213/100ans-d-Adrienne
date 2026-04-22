@@ -183,7 +183,12 @@
                     body: JSON.stringify({ password })
                 });
 
-                const data = await res.json();
+                let data;
+                try {
+                    data = await res.json();
+                } catch (e) {
+                    data = { error: 'Le serveur a renvoyé une réponse invalide.' };
+                }
 
                 if (res.ok) {
                     window.location.href = '/admin/dashboard.html';
@@ -192,7 +197,8 @@
                     errorEl.classList.remove('hidden');
                 }
             } catch (err) {
-                errorEl.textContent = 'Erreur réseau';
+                console.error('Login error:', err);
+                errorEl.textContent = 'Erreur réseau. Vérifiez votre connexion ou les paramètres du serveur.';
                 errorEl.classList.remove('hidden');
             }
         });
