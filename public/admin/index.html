@@ -49,15 +49,6 @@
     </style>
 </head>
 <body class="bg-[#0a0502] min-h-screen flex items-center justify-center p-4 overflow-hidden relative">
-    <script>
-        // Check if already logged in and auto-redirect if so
-        // But only if we are NOT already in the process of logging in
-        if (location.search !== '?login') {
-            fetch('/api/check-auth').then(res => {
-                if (res.ok) window.location.href = '/admin/dashboard.html';
-            });
-        }
-    </script>
     <!-- Atmospheric background -->
     <div class="fixed inset-0 pointer-events-none">
         <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-rose-500/10 blur-[120px] rounded-full"></div>

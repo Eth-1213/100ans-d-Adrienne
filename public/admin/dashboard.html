@@ -32,21 +32,9 @@
         }
     </style>
 </head>
-<body class="bg-[#0a0502] min-h-screen relative overflow-x-hidden invisible">
+<body class="bg-[#0a0502] min-h-screen relative overflow-x-hidden">
     <script>
-        (async () => {
-            try {
-                const res = await fetch('/api/check-auth');
-                if (!res.ok) {
-                    window.location.href = '/admin/index.html';
-                } else {
-                    document.body.classList.remove('invisible');
-                }
-            } catch (err) {
-                console.error('Auth check failed:', err);
-                window.location.href = '/admin/index.html';
-            }
-        })();
+        // Auth check completely removed for free access mode
     </script>
 
     <!-- Atmospheric background -->
