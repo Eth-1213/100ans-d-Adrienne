@@ -14,6 +14,14 @@ async function startServer() {
   app.use(express.json());
   app.use(cookieParser());
 
+  // Health check
+  app.get("/api/health", (_req, res) => {
+    res.json({ status: "ok", env: { 
+      hasAdminPassword: !!process.env.ADMIN_PASSWORD,
+      nodeEnv: process.env.NODE_ENV
+    }});
+  });
+
   // Request logger
   app.use((req, _res, next) => {
     console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
@@ -22,29 +30,34 @@ async function startServer() {
 
   // API Routes
   app.post("/api/login", (req, res) => {
-    const { password } = req.body;
+    try {
+      const { password } = req.body;
 
-    if (!process.env.ADMIN_PASSWORD) {
-      console.error("ADMIN_PASSWORD is not set in environment");
-      return res.status(500).json({ error: "Configuration du serveur incomplète (ADMIN_PASSWORD manquant)." });
+      if (!process.env.ADMIN_PASSWORD) {
+        console.error("ADMIN_PASSWORD is not set in environment");
+        return res.status(500).json({ error: "Configuration du serveur incomplète (ADMIN_PASSWORD manquant)." });
+      }
+
+      if (password !== process.env.ADMIN_PASSWORD) {
+        return res.status(401).json({ error: "Mot de passe incorrect" });
+      }
+
+      const secret = process.env.JWT_SECRET || 'fallback-secret';
+      const token = jwt.sign({ admin: true }, secret, { expiresIn: '8h' });
+
+      res.cookie('admin_token', token, {
+        httpOnly: false,
+        secure: true,
+        sameSite: 'lax',
+        maxAge: 8 * 60 * 60 * 1000,
+        path: '/'
+      });
+
+      return res.status(200).json({ success: true });
+    } catch (err) {
+      console.error("Login route error:", err);
+      return res.status(500).json({ error: "Erreur serveur lors de la connexion." });
     }
-
-    if (password !== process.env.ADMIN_PASSWORD) {
-      return res.status(401).json({ error: "Mot de passe incorrect" });
-    }
-
-    const secret = process.env.JWT_SECRET || 'fallback-secret';
-    const token = jwt.sign({ admin: true }, secret, { expiresIn: '8h' });
-
-    res.cookie('admin_token', token, {
-      httpOnly: false, // Allow client-side to check existence for UI
-      secure: true,
-      sameSite: 'lax',
-      maxAge: 8 * 60 * 60 * 1000,
-      path: '/'
-    });
-
-    res.status(200).json({ success: true });
   });
 
   app.get("/api/check-auth", (req, res) => {

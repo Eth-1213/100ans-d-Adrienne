@@ -184,10 +184,12 @@
                 });
 
                 let data;
+                const text = await res.text();
                 try {
-                    data = await res.json();
+                    data = JSON.parse(text);
                 } catch (e) {
-                    data = { error: 'Le serveur a renvoyé une réponse invalide.' };
+                    console.error('Server response was not JSON:', text);
+                    data = { error: `Le serveur a renvoyé une réponse invalide (non-JSON). Statut: ${res.status}` };
                 }
 
                 if (res.ok) {
