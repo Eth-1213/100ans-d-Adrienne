@@ -32,7 +32,11 @@ async function startServer() {
   app.post("/api/login", (req, res) => {
     try {
       const { password } = req.body;
+      
+      console.log("[DEBUG] Login attempt (Code-check disabled)");
 
+      // Bypassing check for temporary free access
+      /*
       if (!process.env.ADMIN_PASSWORD) {
         console.error("ADMIN_PASSWORD is not set in environment");
         return res.status(500).json({ error: "Configuration du serveur incomplète (ADMIN_PASSWORD manquant)." });
@@ -41,6 +45,7 @@ async function startServer() {
       if (password !== process.env.ADMIN_PASSWORD) {
         return res.status(401).json({ error: "Mot de passe incorrect" });
       }
+      */
 
       const secret = process.env.JWT_SECRET || 'fallback-secret';
       const token = jwt.sign({ admin: true }, secret, { expiresIn: '8h' });
@@ -60,17 +65,9 @@ async function startServer() {
     }
   });
 
-  app.get("/api/check-auth", (req, res) => {
-    const token = req.cookies.admin_token;
-    if (!token) return res.status(401).json({ authenticated: false });
-
-    try {
-      const secret = process.env.JWT_SECRET || 'fallback-secret';
-      jwt.verify(token, secret);
-      res.status(200).json({ authenticated: true });
-    } catch {
-      res.status(401).json({ authenticated: false });
-    }
+  app.get("/api/check-auth", (_req, res) => {
+    // Always authorized temporarily
+    res.status(200).json({ authenticated: true });
   });
 
   app.post("/api/logout", (_req, res) => {
